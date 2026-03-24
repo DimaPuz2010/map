@@ -10,6 +10,12 @@ android {
     namespace = "com.example.map"
     compileSdk = 36
 
+    androidResources {
+        // llama.cpp работает с файлом по пути; модель будем копировать из assets во внутреннее хранилище.
+        // Лучше не сжимать GGUF внутри APK, чтобы ускорить распаковку/копирование и избежать проблем со стримингом.
+        noCompress += "gguf"
+    }
+
     defaultConfig {
         applicationId = "com.example.map"
         minSdk = 25
@@ -53,15 +59,16 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.kotlinx.coroutines.android)
+    implementation("org.codeshipping:llama-kotlin-android:0.1.3")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)
     implementation(libs.okhttp.logging)
-    implementation ("com.yandex.div:div:30.0.0")
+    implementation("com.yandex.div:div:30.0.0")
     implementation("com.yandex.div:div-core:30.0.0")
     implementation("com.yandex.div:div-json:30.0.0")
-    implementation ("com.yandex.div:coil:30.0.0")
-    implementation("com.yandex.android:maps.mobile:4.5.0-lite")
+    implementation("com.yandex.div:coil:30.0.0")
+    implementation("com.yandex.android:maps.mobile:4.5.0-full")
 }

@@ -8,10 +8,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewModelScope
 import com.example.map.data.FakePlacesDataSource
 import com.example.map.data.RemoteFirstRecommendationRepository
 import com.example.map.data.network.NetworkModule
 import com.example.map.domain.model.SelectedLocation
+import com.example.map.llm.AssetModelInstaller
+import com.example.map.llm.DefaultSystemPrompt
+import com.example.map.llm.LlamaChatTemplate
+import com.example.map.llm.LocalLlamaClient
 import com.example.map.ui.DivStateRenderer
 import com.example.map.ui.RecommendationViewModel
 import com.yandex.div.DivDataTag
@@ -37,6 +42,7 @@ class MainActivity : AppCompatActivity(), InputListener {
     private var mapView: MapView? = null
     private lateinit var divView: Div2View
     private var selectedPlacemark: PlacemarkMapObject? = null
+    private var llama: LocalLlamaClient? = null
 
     private val viewModel: RecommendationViewModel by viewModels {
         RecommendationViewModel.Factory(
@@ -68,6 +74,22 @@ class MainActivity : AppCompatActivity(), InputListener {
             setupMap()
         }
         viewModel.onMapReady(isMapKitConfigured)
+
+        // Установка модели из assets во внутреннее хранилище и загрузка llama.cpp.
+        // Положи GGUF файл в: app/src/main/assets/models/<имя>.gguf
+        lifecycleScope.launch {
+            val installed = AssetModelInstaller.ensureInstalled(
+                context = this@MainActivity,
+                assetPath = "models/model.gguf",
+                targetFileName = "model.gguf",
+            )
+
+            llama = LocalLlamaClient(
+                modelPath = installed.file.absolutePath,
+                template = LlamaChatTemplate.CHATML,
+                systemPrompt = DefaultSystemPrompt.TOUR_GUIDE_RU,
+            ).also { it.load() }
+        }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -130,6 +152,8 @@ class MainActivity : AppCompatActivity(), InputListener {
             mapView?.onStop()
             MapKitFactory.getInstance().onStop()
         }
+        llama?.close()
+        llama = null
         super.onStop()
     }
 
