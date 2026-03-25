@@ -14,13 +14,13 @@ data class MainUiState(
 )
 
 val defaultProfile = UserProfile(
-    userId = "guest-omsk",
+    id = "guest-omsk",
     displayName = "Alexey",
-    preferredCategories = listOf("Museum", "Park", "Viewpoint"),
-    dislikedCategories = listOf("Nightlife"),
+    preferredCategories ="Museum Park Viewpoint",
+    dislikedCategories = "Nightlife",
     travelStyle = "Calm city trips",
     budgetLevel = "Medium",
     companionType = "Family",
     language = "ru",
-    history = listOf("Museum"),
+    history = "Museum",
 )

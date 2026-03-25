@@ -5,8 +5,10 @@ import com.example.map.data.network.model.AuthResspons
 import com.example.map.data.network.model.RecommendationRequestDto
 import com.example.map.data.network.model.RecommendationResponseDto
 import com.example.map.domain.model.Recommendation
+import com.example.map.domain.model.UserProfile
 import retrofit2.http.Body
 import retrofit2.http.DELETE
+import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Query
@@ -31,12 +33,12 @@ interface Api {
         @Body auth: Auth,
     ): AuthResspons
 
-    @POST("rest/v1/profils?select=")
+    @GET("rest/v1/profils?select=*")
     suspend fun getUser(
         @Header("apikey") apiKey: String = "sb_publishable_8F_XgYfzMI0Saj6xY7kcAQ_dK4P3vuz",
         @Header("Authorization") auth: String = "",
         @Query("id")  id: String = "eq.1"
-    ): AuthResspons
+    ): List<UserProfile>
 
     @POST("rest/v1/recomindation")
     suspend fun createRecommendation(

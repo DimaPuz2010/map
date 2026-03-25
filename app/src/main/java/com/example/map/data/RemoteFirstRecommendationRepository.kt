@@ -19,7 +19,7 @@ class RemoteFirstRecommendationRepository(
             val service = api ?: error("Recommendation API is not configured")
             service.getRecommendations(
                 RecommendationRequestDto(
-                    userId = profile.userId,
+                    userId = profile.id,
                     latitude = location.latitude,
                     longitude = location.longitude,
                     preferredCategories = profile.preferredCategories,

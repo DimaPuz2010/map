@@ -36,7 +36,7 @@ class FakePlacesDataSource {
     private fun score(recommendation: Recommendation, profile: UserProfile): Double {
         val preferredBoost = if (recommendation.category in profile.preferredCategories) 2.5 else 0.0
         val dislikedPenalty = if (recommendation.category in profile.dislikedCategories) 3.0 else 0.0
-        val historyBoost = if (profile.history.none { it == recommendation.category }) 0.8 else 0.0
+        val historyBoost = if (profile.history.none { it.equals(recommendation.category)}) 0.8 else 0.0
         val distanceFactor = 5.0 - recommendation.distanceMeters / 1_500.0
         return recommendation.rating + preferredBoost + historyBoost + distanceFactor - dislikedPenalty
     }

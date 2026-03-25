@@ -11,7 +11,7 @@ class FakePlacesDataSourceTest {
     @Test
     fun preferredCategoryGetsPrioritized() {
         val profile = UserProfile(
-            userId = "u1",
+            id = "u1",
             displayName = "Test",
             preferredCategories = listOf("Museum"),
             dislikedCategories = emptyList(),

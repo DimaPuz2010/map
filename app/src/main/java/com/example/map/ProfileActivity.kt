@@ -3,6 +3,7 @@ package com.example.map
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -45,13 +46,25 @@ class ProfileActivity : AppCompatActivity() {
                     val api = NetworkModule.createRecommendationApi()
                         ?: error("Network API is not configured (RECOMMENDATION_BASE_URL missing).")
 
-                    api.logIn(
+                    val loginResp = api.logIn(
                         auth = Auth(email = email, password = password),
-                    ).profile
+                    )
+
+                    val authHeader = "Bearer ${loginResp.access_token}"
+                    val profileResp = api.getUser(
+                        auth = authHeader,
+                        id = ("eq."+loginResp.user?.id.toString())
+                    )
+
+                    profileResp[0]
                 }.onSuccess { profile ->
+                    if (profile == null) {
+                        throw IllegalStateException("Profile not returned by getUser().")
+                    }
                     setResultOk(profile)
                 }.onFailure { e ->
                     statusTv.text = "Ошибка: ${e.message}"
+                    Log.d("Net",e.message.toString())
                     Toast.makeText(this@ProfileActivity, e.message ?: "Auth failed", Toast.LENGTH_LONG).show()
                 }
             }
