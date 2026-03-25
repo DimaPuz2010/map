@@ -1,6 +1,8 @@
 package com.example.map
 
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.widget.FrameLayout
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -26,13 +28,26 @@ import com.yandex.div.core.DivConfiguration
 import com.yandex.div.core.view2.Div2View
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
+import com.yandex.mapkit.geometry.BoundingBox
+import com.yandex.mapkit.geometry.Circle
+import com.yandex.mapkit.geometry.Geometry
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.InputListener
 import com.yandex.mapkit.map.Map
 import com.yandex.mapkit.map.PlacemarkMapObject
+import com.yandex.mapkit.map.VisibleRegionUtils
 import com.yandex.mapkit.mapview.MapView
+import com.yandex.mapkit.search.Response
+import com.yandex.mapkit.search.SearchFactory
+import com.yandex.mapkit.search.SearchManagerType
+import com.yandex.mapkit.search.SearchOptions
+import com.yandex.mapkit.search.SearchType
+import com.yandex.mapkit.search.Session
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
+import kotlin.math.cos
 
 class MainActivity : AppCompatActivity(), InputListener {
     private val MAPKIT_API_KEY = "a6f0b6af-0e69-4781-8782-5fa1061829f7"
@@ -52,6 +67,7 @@ class MainActivity : AppCompatActivity(), InputListener {
             ),
         )
     }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,20 +91,24 @@ class MainActivity : AppCompatActivity(), InputListener {
         }
         viewModel.onMapReady(isMapKitConfigured)
 
+
+
         // Установка модели из assets во внутреннее хранилище и загрузка llama.cpp.
         // Положи GGUF файл в: app/src/main/assets/models/<имя>.gguf
         lifecycleScope.launch {
-            val installed = AssetModelInstaller.ensureInstalled(
-                context = this@MainActivity,
-                assetPath = "models/model.gguf",
-                targetFileName = "model.gguf",
-            )
+//            val installed = AssetModelInstaller.ensureInstalled(
+//                context = this@MainActivity,
+//                assetPath = "models/model.gguf",
+//                targetFileName = "model.gguf",
+//            )
 
             llama = LocalLlamaClient(
-                modelPath = installed.file.absolutePath,
+                modelPath = getModelPath("models/model.gguf ", "model.gguf"),
                 template = LlamaChatTemplate.CHATML,
                 systemPrompt = DefaultSystemPrompt.TOUR_GUIDE_RU,
             ).also { it.load() }
+            llama?.startNewSession()
+            Log.d("LLAMA", llama!!.generate("Привет, раскажи о популярных местах."))
         }
 
         lifecycleScope.launch {
@@ -99,7 +119,19 @@ class MainActivity : AppCompatActivity(), InputListener {
             }
         }
     }
+    fun getModelPath(assetPath: String, fileName: String): String {
+        val outFile = File(filesDir, fileName)
 
+        if (!outFile.exists()) {
+            assets.open(assetPath).use { input ->
+                FileOutputStream(outFile).use { output ->
+                    input.copyTo(output) // важно: не readBytes()
+                }
+            }
+        }
+
+        return outFile.absolutePath
+    }
     private fun createDivView(): Div2View {
         val configuration = DivConfiguration.Builder(CoilDivImageLoader(this))
             .actionHandler(NotificationDivActionHandler())

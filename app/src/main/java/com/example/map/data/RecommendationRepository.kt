@@ -9,4 +9,5 @@ interface RecommendationRepository {
         location: SelectedLocation,
         profile: UserProfile,
     ): List<Recommendation>
+
 }

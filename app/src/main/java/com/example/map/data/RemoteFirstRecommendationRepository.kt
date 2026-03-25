@@ -31,6 +31,7 @@ class RemoteFirstRecommendationRepository(
                     history = profile.history,
                 ),
             )
+
         }.getOrNull()
 
         return remoteResult?.recommendations?.map {

@@ -3,8 +3,6 @@ plugins {
     alias(libs.plugins.kotlin.android)
 }
 
-val mapKitApiKey = providers.gradleProperty("MAPKIT_API_KEY").orElse("")
-val recommendationBaseUrl = providers.gradleProperty("RECOMMENDATION_BASE_URL").orElse("")
 
 android {
     namespace = "com.example.map"
@@ -18,14 +16,12 @@ android {
 
     defaultConfig {
         applicationId = "com.example.map"
-        minSdk = 25
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "MAPKIT_API_KEY", "\"${mapKitApiKey.get()}\"")
-        buildConfigField("String", "RECOMMENDATION_BASE_URL", "\"${recommendationBaseUrl.get()}\"")
     }
 
     buildTypes {
@@ -50,7 +46,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -70,5 +65,5 @@ dependencies {
     implementation("com.yandex.div:div-core:30.0.0")
     implementation("com.yandex.div:div-json:30.0.0")
     implementation("com.yandex.div:coil:30.0.0")
-    implementation("com.yandex.android:maps.mobile:4.5.0-full")
+    implementation("com.yandex.android:maps.mobile:4.33.1-full")
 }
