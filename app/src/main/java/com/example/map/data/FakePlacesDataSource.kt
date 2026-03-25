@@ -25,6 +25,7 @@ class FakePlacesDataSource(
 
     private var isLoading = false
     private var loadAttempted = false
+    private val seedPlaces: List<Recommendation> = buildSeedPlaces()
 
     init {
         // Загружаем данные при инициализации
@@ -43,14 +44,17 @@ class FakePlacesDataSource(
                 val api = createRecommendationApi()
                 if (api != null) {
                     val recommendations = api.getRecommendationsFromDb(Data.userAuth)
-                    _places.value = recommendations
+                    _places.value = if (recommendations.isNotEmpty()) recommendations else seedPlaces
                     loadAttempted = true
                 } else {
                     println("API is null, cannot load recommendations from database")
+                    _places.value = seedPlaces
+                    loadAttempted = true
                 }
             } catch (e: Exception) {
                 println("Error loading recommendations from database: ${e.message}")
-                _places.value = emptyList()
+                _places.value = seedPlaces
+                loadAttempted = true
             } finally {
                 isLoading = false
             }
@@ -74,6 +78,10 @@ class FakePlacesDataSource(
             return emptyList()
         }
 
+        val preferred = tokenizeList(profile.preferredCategories)
+        val disliked = tokenizeList(profile.dislikedCategories)
+        val history = tokenizeList(profile.history)
+
         return allPlaces
             .map { place ->
                 val distance = distanceMeters(
@@ -84,11 +92,11 @@ class FakePlacesDataSource(
                 )
                 place.copy(
                     distanceMeters = distance,
-                    reason = buildReason(place.category, profile, distance),
+                    reason = buildReason(place.category, profile, preferred, disliked, distance),
                 )
             }
             .filter { it.distanceMeters <= 8_000 }
-            .sortedByDescending { score(it, profile) }
+            .sortedByDescending { score(it, preferred, disliked, history) }
             .take(5)
     }
 
@@ -100,28 +108,55 @@ class FakePlacesDataSource(
             val api = createRecommendationApi()
             if (api != null) {
                 val recommendations = api.getRecommendationsFromDb(Data.userAuth)
-                _places.value = recommendations
+                _places.value = if (recommendations.isNotEmpty()) recommendations else seedPlaces
+                loadAttempted = true
+            } else {
+                _places.value = seedPlaces
                 loadAttempted = true
             }
         } catch (e: Exception) {
             println("Error refreshing recommendations: ${e.message}")
+            _places.value = seedPlaces
+            loadAttempted = true
         }
     }
-    private fun score(recommendation: Recommendation, profile: UserProfile): Double {
-        val preferredBoost = if (recommendation.category in profile.preferredCategories) 2.5 else 0.0
-        val dislikedPenalty = if (recommendation.category in profile.dislikedCategories) 3.0 else 0.0
-        val historyBoost = if (profile.history.none { it.equals(recommendation.category)}) 0.8 else 0.0
+
+    private fun score(
+        recommendation: Recommendation,
+        preferred: Set<String>,
+        disliked: Set<String>,
+        history: Set<String>,
+    ): Double {
+        val category = recommendation.category.lowercase()
+        val preferredBoost = if (preferred.contains(category)) 2.5 else 0.0
+        val dislikedPenalty = if (disliked.contains(category)) 3.0 else 0.0
+        val historyBoost = if (!history.contains(category)) 0.8 else 0.0
         val distanceFactor = 5.0 - recommendation.distanceMeters / 1_500.0
         return recommendation.rating + preferredBoost + historyBoost + distanceFactor - dislikedPenalty
     }
 
-    private fun buildReason(category: String, profile: UserProfile, distance: Int): String {
+    private fun buildReason(
+        category: String,
+        profile: UserProfile,
+        preferred: Set<String>,
+        disliked: Set<String>,
+        distance: Int,
+    ): String {
+        val categoryKey = category.lowercase()
         val categoryReason = when {
-            category in profile.preferredCategories -> "Matches the preferred ${category.lowercase()} category."
-            category in profile.dislikedCategories -> "Kept only as a nearby fallback option."
+            preferred.contains(categoryKey) -> "Matches your preferred ${category.lowercase()} category."
+            disliked.contains(categoryKey) -> "Kept only as a nearby fallback option."
             else -> "Fits the ${profile.travelStyle.lowercase()} profile."
         }
         return "$categoryReason Around $distance m from the selected point."
+    }
+
+    private fun tokenizeList(text: String): Set<String> {
+        return text
+            .split(',', ';', '|', '\n', '\t', ' ')
+            .map { it.trim().lowercase() }
+            .filter { it.isNotBlank() }
+            .toSet()
     }
 
     private fun distanceMeters(
@@ -140,5 +175,76 @@ class FakePlacesDataSource(
                 sin(dLon / 2) * sin(dLon / 2) * cos(originLat) * cos(targetLat)
         val c = 2 * atan2(sqrt(a), sqrt(1 - a))
         return (earthRadius * c).roundToInt()
+    }
+
+    private fun buildSeedPlaces(): List<Recommendation> {
+        // Офлайн-датасет вокруг Омска (чтобы основной сценарий работал без логина/бэкенда).
+        return listOf(
+            Recommendation(
+                id = "seed-omsk-1",
+                name = "Омская крепость",
+                category = "Museum",
+                latitude = 54.9917,
+                longitude = 73.3638,
+                address = "Омск",
+                distanceMeters = 0,
+                rating = 4.6,
+                imageUrl = "",
+                reason = "",
+                source = "seed",
+            ),
+            Recommendation(
+                id = "seed-omsk-2",
+                name = "Парк культуры и отдыха",
+                category = "Park",
+                latitude = 54.9969,
+                longitude = 73.3682,
+                address = "Омск",
+                distanceMeters = 0,
+                rating = 4.5,
+                imageUrl = "",
+                reason = "",
+                source = "seed",
+            ),
+            Recommendation(
+                id = "seed-omsk-3",
+                name = "Набережная Иртыша",
+                category = "Viewpoint",
+                latitude = 54.9879,
+                longitude = 73.3688,
+                address = "Омск",
+                distanceMeters = 0,
+                rating = 4.7,
+                imageUrl = "",
+                reason = "",
+                source = "seed",
+            ),
+            Recommendation(
+                id = "seed-omsk-4",
+                name = "Театр драмы",
+                category = "Theatre",
+                latitude = 54.9896,
+                longitude = 73.3680,
+                address = "Омск",
+                distanceMeters = 0,
+                rating = 4.8,
+                imageUrl = "",
+                reason = "",
+                source = "seed",
+            ),
+            Recommendation(
+                id = "seed-omsk-5",
+                name = "Музей искусств",
+                category = "Museum",
+                latitude = 54.9908,
+                longitude = 73.3714,
+                address = "Омск",
+                distanceMeters = 0,
+                rating = 4.7,
+                imageUrl = "",
+                reason = "",
+                source = "seed",
+            ),
+        )
     }
 }

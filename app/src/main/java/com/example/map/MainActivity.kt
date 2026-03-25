@@ -1,15 +1,20 @@
 package com.example.map
 
+import android.Manifest
 import android.os.Bundle
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.util.Log
 import android.widget.FrameLayout
+import android.view.View
 import com.google.android.material.button.MaterialButton
 import com.google.gson.Gson
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -51,6 +56,7 @@ class MainActivity : AppCompatActivity(), InputListener {
     private lateinit var client: LocalLlamaClient
     private lateinit var mapHost: FrameLayout
     private lateinit var divContainer: FrameLayout
+    private lateinit var loadingBar: View
     private var mapView: MapView? = null
     private lateinit var divView: Div2View
     private var selectedPlacemark: PlacemarkMapObject? = null
@@ -60,6 +66,8 @@ class MainActivity : AppCompatActivity(), InputListener {
     private lateinit var profile: UserProfile
     private var resultSerch: List<SearchPoint> = listOf()
     private var api = createRecommendationApi()
+    private var mapKitStarted: Boolean = false
+    private lateinit var locationPermissionLauncher: ActivityResultLauncher<Array<String>>
 
     private val viewModel: RecommendationViewModel by viewModels {
         RecommendationViewModel.Factory(
@@ -93,6 +101,13 @@ class MainActivity : AppCompatActivity(), InputListener {
         setContentView(R.layout.activity_main)
         mapHost = findViewById(R.id.mapHost)
         divContainer = findViewById(R.id.divContainer)
+        loadingBar = findViewById(R.id.loadingBar)
+
+        locationPermissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { _ ->
+                if (isMapKitConfigured) startMapKitSafely()
+            }
+        requestLocationPermissionIfNeeded()
 
         divView = createDivView()
         divContainer.addView(divView)
@@ -136,6 +151,7 @@ class MainActivity : AppCompatActivity(), InputListener {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { uiState ->
                     divView.setData(DivStateRenderer.build(uiState), DivDataTag("main_state"))
+                    loadingBar.visibility = if (uiState.isLoading) View.VISIBLE else View.GONE
                     if (!uiState.isMapReady || uiState.isLoading || uiState.errorMessage != null) return@collect
 
                     val signature = uiState.recommendations.joinToString("|") { "${it.id}:${it.latitude},${it.longitude}" }
@@ -214,18 +230,45 @@ class MainActivity : AppCompatActivity(), InputListener {
         localMapView.mapWindow.map.addInputListener(this)
     }
 
+    private fun hasLocationPermission(): Boolean {
+        val fine = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+        val coarse = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+        return fine == PackageManager.PERMISSION_GRANTED || coarse == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun requestLocationPermissionIfNeeded() {
+        if (hasLocationPermission()) return
+        locationPermissionLauncher.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+            ),
+        )
+    }
+
+    private fun startMapKitSafely() {
+        if (mapKitStarted) return
+        // Важно: карта и маркеры должны работать даже без гео-пермишенов.
+        mapView?.onStart()
+        runCatching { MapKitFactory.getInstance().onStart() }
+            .onFailure { e ->
+                // На некоторых прошивках/SDK попытка старта может триггерить LocationSubscription.
+                // Не падаем — геолокационные фичи просто не будут доступны.
+                Log.w("MapKit", "MapKit onStart failed (location permission?)", e)
+            }
+        mapKitStarted = true
+    }
+
     override fun onStart() {
         super.onStart()
-        if (MAPKIT_API_KEY.isNotBlank()) {
-            MapKitFactory.getInstance().onStart()
-            mapView?.onStart()
-        }
+        if (MAPKIT_API_KEY.isNotBlank()) startMapKitSafely()
     }
 
     override fun onStop() {
-        if (MAPKIT_API_KEY.isNotBlank()) {
+        if (MAPKIT_API_KEY.isNotBlank() && mapKitStarted) {
             mapView?.onStop()
-            MapKitFactory.getInstance().onStop()
+            runCatching { MapKitFactory.getInstance().onStop() }
+            mapKitStarted = false
         }
         if (llamaClientDeferred.isCompleted) {
             runCatching { llamaClientDeferred.getCompleted().close() }
