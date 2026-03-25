@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import android.util.Log
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.roundToInt
@@ -46,13 +47,17 @@ class FakePlacesDataSource(
                     val recommendations = api.getRecommendationsFromDb(Data.userAuth)
                     _places.value = if (recommendations.isNotEmpty()) recommendations else seedPlaces
                     loadAttempted = true
+                    Log.i(
+                        "Recommendations",
+                        "Loaded ${recommendations.size} places from DB, seedUsed=${recommendations.isEmpty()}",
+                    )
                 } else {
-                    println("API is null, cannot load recommendations from database")
+                    Log.w("Recommendations", "API is null, using seed places")
                     _places.value = seedPlaces
                     loadAttempted = true
                 }
             } catch (e: Exception) {
-                println("Error loading recommendations from database: ${e.message}")
+                Log.e("Recommendations", "Error loading recommendations from DB", e)
                 _places.value = seedPlaces
                 loadAttempted = true
             } finally {
@@ -68,6 +73,10 @@ class FakePlacesDataSource(
         location: SelectedLocation,
         profile: UserProfile,
     ): List<Recommendation> {
+        Log.i(
+            "Recommendations",
+            "Fallback recommend for lat=${location.latitude}, lon=${location.longitude}",
+        )
         // Если данные еще не загружены, пытаемся загрузить синхронно
         if (_places.value.isEmpty() && !loadAttempted) {
             loadPlacesFromDatabase()
@@ -98,6 +107,7 @@ class FakePlacesDataSource(
             .filter { it.distanceMeters <= 8_000 }
             .sortedByDescending { score(it, preferred, disliked, history) }
             .take(5)
+            .also { Log.i("Recommendations", "Fallback result size=${it.size}") }
     }
 
     /**
@@ -110,12 +120,17 @@ class FakePlacesDataSource(
                 val recommendations = api.getRecommendationsFromDb(Data.userAuth)
                 _places.value = if (recommendations.isNotEmpty()) recommendations else seedPlaces
                 loadAttempted = true
+                Log.i(
+                    "Recommendations",
+                    "Refreshed ${recommendations.size} places from DB, seedUsed=${recommendations.isEmpty()}",
+                )
             } else {
                 _places.value = seedPlaces
                 loadAttempted = true
+                Log.w("Recommendations", "API is null on refresh, using seed places")
             }
         } catch (e: Exception) {
-            println("Error refreshing recommendations: ${e.message}")
+            Log.e("Recommendations", "Error refreshing recommendations", e)
             _places.value = seedPlaces
             loadAttempted = true
         }

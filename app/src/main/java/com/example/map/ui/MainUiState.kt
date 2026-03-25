@@ -11,6 +11,7 @@ data class MainUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val isMapReady: Boolean = false,
+    val isRecommendationsCollapsed: Boolean = false,
 )
 
 val defaultProfile = UserProfile(

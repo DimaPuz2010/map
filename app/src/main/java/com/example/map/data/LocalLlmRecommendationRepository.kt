@@ -19,6 +19,7 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 import kotlin.math.roundToInt
 import kotlin.math.atan2
+import android.util.Log
 
 class LocalLlmRecommendationRepository(
     private val llamaClientDeferred: Deferred<LocalLlamaClient>,
@@ -37,6 +38,10 @@ class LocalLlmRecommendationRepository(
             val llama = llamaClientDeferred.await()
 
             generationMutex.withLock {
+                Log.i(
+                    "Recommendations",
+                    "LLM generation start for lat=${location.latitude}, lon=${location.longitude}",
+                )
                 llama.startNewSession()
 
                 val prompt = RecommendationPromptBuilder.build(
@@ -49,9 +54,12 @@ class LocalLlmRecommendationRepository(
                 )
 
                 val raw = llama.generate(prompt)
+                Log.i("Recommendations", "LLM raw response length=${raw.length}")
                 val parsedPlaces = parsePlacesJson(raw)
+                Log.i("Recommendations", "LLM parsed places=${parsedPlaces.size}")
                 if (parsedPlaces.isEmpty()) {
                     // Используем данные из базы данных через fallback
+                    Log.w("Recommendations", "LLM returned empty list, falling back to DB")
                     fallback.recommend(location, profile)
                 } else {
                     parsedPlaces.mapIndexed { idx, placeDto ->
@@ -65,6 +73,7 @@ class LocalLlmRecommendationRepository(
             }
         }.getOrElse {
             // В случае ошибки используем данные из базы данных
+            Log.e("Recommendations", "LLM failed, falling back to DB", it)
             fallback.recommend(location, profile)
         }
     }
