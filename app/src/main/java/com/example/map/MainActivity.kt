@@ -1,24 +1,25 @@
 package com.example.map
 
-import android.content.Context
 import android.os.Bundle
-import android.util.Log
+import android.content.Intent
 import android.widget.FrameLayout
+import com.google.android.material.button.MaterialButton
+import com.google.gson.Gson
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.lifecycle.viewModelScope
 import com.example.map.data.FakePlacesDataSource
-import com.example.map.data.RemoteFirstRecommendationRepository
-import com.example.map.data.network.NetworkModule
 import com.example.map.domain.model.SelectedLocation
 import com.example.map.llm.AssetModelInstaller
 import com.example.map.llm.DefaultSystemPrompt
 import com.example.map.llm.LlamaChatTemplate
 import com.example.map.llm.LocalLlamaClient
+import com.example.map.data.LocalLlmRecommendationRepository
+import com.example.map.domain.model.UserProfile
 import com.example.map.ui.DivStateRenderer
 import com.example.map.ui.RecommendationViewModel
 import com.yandex.div.DivDataTag
@@ -28,26 +29,14 @@ import com.yandex.div.core.DivConfiguration
 import com.yandex.div.core.view2.Div2View
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
-import com.yandex.mapkit.geometry.BoundingBox
-import com.yandex.mapkit.geometry.Circle
-import com.yandex.mapkit.geometry.Geometry
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.InputListener
 import com.yandex.mapkit.map.Map
 import com.yandex.mapkit.map.PlacemarkMapObject
-import com.yandex.mapkit.map.VisibleRegionUtils
 import com.yandex.mapkit.mapview.MapView
-import com.yandex.mapkit.search.Response
-import com.yandex.mapkit.search.SearchFactory
-import com.yandex.mapkit.search.SearchManagerType
-import com.yandex.mapkit.search.SearchOptions
-import com.yandex.mapkit.search.SearchType
-import com.yandex.mapkit.search.Session
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileOutputStream
-import kotlin.math.cos
+import kotlinx.coroutines.CompletableDeferred
 
 class MainActivity : AppCompatActivity(), InputListener {
     private val MAPKIT_API_KEY = "a6f0b6af-0e69-4781-8782-5fa1061829f7"
@@ -57,12 +46,14 @@ class MainActivity : AppCompatActivity(), InputListener {
     private var mapView: MapView? = null
     private lateinit var divView: Div2View
     private var selectedPlacemark: PlacemarkMapObject? = null
-    private var llama: LocalLlamaClient? = null
+    private val llamaClientDeferred = CompletableDeferred<LocalLlamaClient>()
+    private var recommendationMarkers: List<PlacemarkMapObject> = emptyList()
+    private var lastRecommendationsSignature: String = ""
 
     private val viewModel: RecommendationViewModel by viewModels {
         RecommendationViewModel.Factory(
-            RemoteFirstRecommendationRepository(
-                api = NetworkModule.createRecommendationApi(),
+            LocalLlmRecommendationRepository(
+                llamaClientDeferred = llamaClientDeferred,
                 fallback = FakePlacesDataSource(),
             ),
         )
@@ -91,46 +82,67 @@ class MainActivity : AppCompatActivity(), InputListener {
         }
         viewModel.onMapReady(isMapKitConfigured)
 
+        val profileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode != RESULT_OK) return@registerForActivityResult
 
+            val json = result.data?.getStringExtra(ProfileActivity.EXTRA_PROFILE_JSON).orEmpty()
+            if (json.isBlank()) return@registerForActivityResult
+
+            val profile = Gson().fromJson(json, UserProfile::class.java)
+            viewModel.setProfile(profile)
+        }
+
+        findViewById<MaterialButton>(R.id.profileBtn).setOnClickListener {
+            profileLauncher.launch(Intent(this, ProfileActivity::class.java))
+        }
 
         // Установка модели из assets во внутреннее хранилище и загрузка llama.cpp.
-        // Положи GGUF файл в: app/src/main/assets/models/<имя>.gguf
+        // Положи GGUF файл в: app/src/main/assets/models/model.gguf
         lifecycleScope.launch {
-//            val installed = AssetModelInstaller.ensureInstalled(
-//                context = this@MainActivity,
-//                assetPath = "models/model.gguf",
-//                targetFileName = "model.gguf",
-//            )
+            runCatching {
+                val installed = AssetModelInstaller.ensureInstalled(
+                    context = this@MainActivity,
+                    assetPath = "models/model.gguf",
+                    targetFileName = "model.gguf",
+                )
 
-            llama = LocalLlamaClient(
-                modelPath = getModelPath("models/model.gguf ", "model.gguf"),
-                template = LlamaChatTemplate.CHATML,
-                systemPrompt = DefaultSystemPrompt.TOUR_GUIDE_RU,
-            ).also { it.load() }
-            llama?.startNewSession()
-            Log.d("LLAMA", llama!!.generate("Привет, раскажи о популярных местах."))
+                val client = LocalLlamaClient(
+                    modelPath = installed.file.absolutePath,
+                    template = LlamaChatTemplate.CHATML,
+                    systemPrompt = DefaultSystemPrompt.TOUR_GUIDE_RU,
+                )
+                client.load()
+                client.startNewSession()
+                client
+            }.onSuccess { llamaClientDeferred.complete(it) }
+                .onFailure { e -> llamaClientDeferred.completeExceptionally(e) }
         }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { uiState ->
                     divView.setData(DivStateRenderer.build(uiState), DivDataTag("main_state"))
+                    if (!uiState.isMapReady || uiState.isLoading || uiState.errorMessage != null) return@collect
+
+                    val signature = uiState.recommendations.joinToString("|") { "${it.id}:${it.latitude},${it.longitude}" }
+                    if (signature != lastRecommendationsSignature) {
+                        lastRecommendationsSignature = signature
+                        renderRecommendationsOnMap(uiState.recommendations)
+                    }
                 }
             }
         }
     }
-    fun getModelPath(assetPath: String, fileName: String): String {
-        val outFile = File(filesDir, fileName)
 
-        if (!outFile.exists()) {
-            assets.open(assetPath).use { input ->
-                FileOutputStream(outFile).use { output ->
-                    input.copyTo(output) // важно: не readBytes()
-                }
-            }
+    private fun renderRecommendationsOnMap(recommendations: List<com.example.map.domain.model.Recommendation>) {
+        val map = mapView?.mapWindow?.map ?: return
+
+        recommendationMarkers.forEach { marker ->
+            map.mapObjects.remove(marker)
         }
-
-        return outFile.absolutePath
+        recommendationMarkers = recommendations.map { rec ->
+            map.mapObjects.addPlacemark(Point(rec.latitude, rec.longitude))
+        }
     }
     private fun createDivView(): Div2View {
         val configuration = DivConfiguration.Builder(CoilDivImageLoader(this))
@@ -184,8 +196,9 @@ class MainActivity : AppCompatActivity(), InputListener {
             mapView?.onStop()
             MapKitFactory.getInstance().onStop()
         }
-        llama?.close()
-        llama = null
+        if (llamaClientDeferred.isCompleted) {
+            runCatching { llamaClientDeferred.getCompleted().close() }
+        }
         super.onStop()
     }
 

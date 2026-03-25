@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.example.map.domain.model.UserProfile
 
 class RecommendationViewModel(
     private val repository: RecommendationRepository,
@@ -30,7 +31,18 @@ class RecommendationViewModel(
                 errorMessage = null,
             )
         }
+        requestRecommendations(location)
+    }
 
+    fun setProfile(profile: UserProfile) {
+        _uiState.update { it.copy(profile = profile) }
+
+        // Если точка уже выбрана, обновим рекомендации с новым профилем.
+        val selected = _uiState.value.selectedLocation ?: return
+        onLocationSelected(selected)
+    }
+
+    private fun requestRecommendations(location: SelectedLocation) {
         viewModelScope.launch {
             val profile = _uiState.value.profile
             runCatching { repository.getRecommendations(location, profile) }
