@@ -4,6 +4,8 @@ import android.Manifest
 import android.os.Bundle
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.util.Log
 import android.widget.FrameLayout
 import android.view.View
@@ -45,6 +47,7 @@ import com.yandex.mapkit.map.InputListener
 import com.yandex.mapkit.map.Map
 import com.yandex.mapkit.map.PlacemarkMapObject
 import com.yandex.mapkit.mapview.MapView
+import com.yandex.runtime.image.ImageProvider
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CompletableDeferred
 import java.io.File
@@ -68,6 +71,8 @@ class MainActivity : AppCompatActivity(), InputListener {
     private var api = createRecommendationApi()
     private var mapKitStarted: Boolean = false
     private lateinit var locationPermissionLauncher: ActivityResultLauncher<Array<String>>
+    private var recommendationPinProvider: ImageProvider? = null
+    private var selectedPinProvider: ImageProvider? = null
 
     private val viewModel: RecommendationViewModel by viewModels {
         RecommendationViewModel.Factory(
@@ -183,12 +188,23 @@ class MainActivity : AppCompatActivity(), InputListener {
 
     private fun renderRecommendationsOnMap(recommendations: List<com.example.map.domain.model.Recommendation>) {
         val map = mapView?.mapWindow?.map ?: return
+        val pin = recommendationPinProvider ?: run {
+            val bmp = createBitmapFromVector(R.drawable.ic_pin_blue_svg)
+            val provider = bmp?.let { ImageProvider.fromBitmap(it) }
+            recommendationPinProvider = provider
+            provider
+        }
 
         recommendationMarkers.forEach { marker ->
             map.mapObjects.remove(marker)
         }
         recommendationMarkers = recommendations.map { rec ->
-            map.mapObjects.addPlacemark(Point(rec.latitude, rec.longitude))
+            val point = Point(rec.latitude, rec.longitude)
+            if (pin != null) {
+                map.mapObjects.addPlacemark(point, pin)
+            } else {
+                map.mapObjects.addPlacemark(point)
+            }
         }
     }
     private fun createDivView(): Div2View {
@@ -278,7 +294,17 @@ class MainActivity : AppCompatActivity(), InputListener {
 
     override fun onMapTap(map: Map, point: Point) {
         selectedPlacemark?.let { map.mapObjects.remove(it) }
-        selectedPlacemark = map.mapObjects.addPlacemark(point)
+        val selectedPin = selectedPinProvider ?: run {
+            val bmp = createBitmapFromVector(R.drawable.ic_pin_red_svg)
+            val provider = bmp?.let { ImageProvider.fromBitmap(it) }
+            selectedPinProvider = provider
+            provider
+        }
+        selectedPlacemark = if (selectedPin != null) {
+            map.mapObjects.addPlacemark(point, selectedPin)
+        } else {
+            map.mapObjects.addPlacemark(point)
+        }
         viewModel.onLocationSelected(
             SelectedLocation(
                 latitude = point.latitude,
@@ -292,4 +318,17 @@ class MainActivity : AppCompatActivity(), InputListener {
     }
 
     override fun onMapLongTap(map: Map, point: Point) = Unit
+
+    private fun createBitmapFromVector(art: Int): Bitmap? {
+        val drawable = ContextCompat.getDrawable(this, art) ?: return null
+        val bitmap = Bitmap.createBitmap(
+            drawable.intrinsicWidth,
+            drawable.intrinsicHeight,
+            Bitmap.Config.ARGB_8888,
+        )
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return bitmap
+    }
 }
