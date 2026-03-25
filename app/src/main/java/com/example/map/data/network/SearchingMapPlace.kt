@@ -1,6 +1,7 @@
 package com.example.map.data.network
 
 import android.util.Log
+import com.example.map.MainActivity
 import com.example.map.domain.model.SearchPoint
 import com.example.map.llm.LocalLlamaClient
 import com.yandex.mapkit.geometry.BoundingBox
@@ -11,6 +12,9 @@ import com.yandex.mapkit.search.SearchFactory
 import com.yandex.mapkit.search.SearchManagerType
 import com.yandex.mapkit.search.SearchOptions
 import com.yandex.mapkit.search.Session
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 import kotlin.math.cos
 
 class SearchingMapPlace {
@@ -21,35 +25,37 @@ class SearchingMapPlace {
         resultPageSize = 32
     }
 
+    suspend fun search(response: String, cont: MainActivity): List<SearchPoint> = suspendCoroutine { continuation ->
+        val points = ArrayList<SearchPoint>()
 
-
-    fun search(response:String): List<SearchPoint>{
-        val points: ArrayList<SearchPoint> = ArrayList<SearchPoint>()
         val searchSessionListener = object : Session.SearchListener {
             override fun onSearchResponse(response: Response) {
-                response.collection.children.forEach {
-                    points.add(SearchPoint(
-                        name = it.obj!!.name?:"",
-                        address = it.obj!!.descriptionText?: "",
-                        lat = it.obj!!.geometry[0].point!!.latitude,
-                        lon = it.obj!!.geometry[0].point!!.latitude
-                    ))
+                response.collection.children.forEach { item ->
+                    points.add(
+                        SearchPoint(
+                            name = item.obj?.name ?: "",
+                            address = item.obj?.descriptionText ?: "",
+                            lat = item.obj?.geometry?.getOrNull(0)?.point?.latitude ?: 0.0,
+                            lon = item.obj?.geometry?.getOrNull(0)?.point?.longitude ?: 0.0
+                        )
+                    )
                 }
+                continuation.resume(points)
+                cont.setSearchResult(points)
             }
 
             override fun onSearchError(error: com.yandex.runtime.Error) {
-                // Handle search error.
+
             }
         }
+
         searchManager.submit(
-            "кофе/веган",
+            response, // Используем параметр response вместо жестко заданной строки
             Geometry.fromBoundingBox(createBoundingBox(Point(54.9885, 73.3242), 1000.0f)),
             searchOptions,
             searchSessionListener,
         )
-        return points;
     }
-
 }
 
 private fun createBoundingBox(center: Point, radiusMeters: Float): BoundingBox {

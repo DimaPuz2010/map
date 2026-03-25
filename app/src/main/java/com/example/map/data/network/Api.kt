@@ -53,4 +53,10 @@ interface Api {
         @Header("Authorization") auth: String = "",
         @Query("id")  id: String = "eq.1"
     )
+
+    @GET("rest/v1/recomindation?select=*")
+    suspend fun getRecommendationsFromDb(
+        @Header("apikey") apiKey: String = "sb_publishable_8F_XgYfzMI0Saj6xY7kcAQ_dK4P3vuz",
+        @Header("Authorization") auth: String = "",
+    ): List<Recommendation>
 }

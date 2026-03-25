@@ -1,6 +1,5 @@
 package com.example.map.data
 
-import com.example.map.data.RecommendationRepository
 import com.example.map.domain.model.Recommendation
 import com.example.map.domain.model.SelectedLocation
 import com.example.map.domain.model.UserProfile
@@ -52,6 +51,7 @@ class LocalLlmRecommendationRepository(
                 val raw = llama.generate(prompt)
                 val parsedPlaces = parsePlacesJson(raw)
                 if (parsedPlaces.isEmpty()) {
+                    // Используем данные из базы данных через fallback
                     fallback.recommend(location, profile)
                 } else {
                     parsedPlaces.mapIndexed { idx, placeDto ->
@@ -64,6 +64,7 @@ class LocalLlmRecommendationRepository(
                 }
             }
         }.getOrElse {
+            // В случае ошибки используем данные из базы данных
             fallback.recommend(location, profile)
         }
     }
@@ -124,9 +125,8 @@ class LocalLlmRecommendationRepository(
         val targetLat = Math.toRadians(lat2)
 
         val a = sin(dLat / 2) * sin(dLat / 2) +
-            sin(dLon / 2) * sin(dLon / 2) * cos(originLat) * cos(targetLat)
+                sin(dLon / 2) * sin(dLon / 2) * cos(originLat) * cos(targetLat)
         val c = 2 * atan2(sqrt(a), sqrt(1 - a))
         return (earthRadius * c).roundToInt()
     }
 }
-

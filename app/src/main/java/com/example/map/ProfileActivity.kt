@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import android.widget.EditText
 import com.google.android.material.button.MaterialButton
 import android.widget.TextView
+import com.example.map.data.Data
 
 class ProfileActivity : AppCompatActivity() {
     companion object {
@@ -49,7 +50,7 @@ class ProfileActivity : AppCompatActivity() {
                     val loginResp = api.logIn(
                         auth = Auth(email = email, password = password),
                     )
-
+                    Data.userAuth = loginResp.access_token.toString()
                     val authHeader = "Bearer ${loginResp.access_token}"
                     val profileResp = api.getUser(
                         auth = authHeader,

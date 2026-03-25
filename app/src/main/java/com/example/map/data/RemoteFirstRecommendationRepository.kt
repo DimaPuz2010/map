@@ -31,7 +31,6 @@ class RemoteFirstRecommendationRepository(
                     history = profile.history,
                 ),
             )
-
         }.getOrNull()
 
         return remoteResult?.recommendations?.map {
@@ -48,6 +47,6 @@ class RemoteFirstRecommendationRepository(
                 reason = it.reason,
                 source = it.source,
             )
-        } ?: fallback.recommend(location, profile)
+        } ?: fallback.recommend(location, profile) // Используем данные из базы данных
     }
 }

@@ -2,6 +2,7 @@ package com.example.map
 
 import android.os.Bundle
 import android.content.Intent
+import android.util.Log
 import android.widget.FrameLayout
 import com.google.android.material.button.MaterialButton
 import com.google.gson.Gson
@@ -12,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.map.data.Data
 import com.example.map.data.FakePlacesDataSource
 import com.example.map.domain.model.SelectedLocation
 import com.example.map.llm.AssetModelInstaller
@@ -19,6 +21,9 @@ import com.example.map.llm.DefaultSystemPrompt
 import com.example.map.llm.LlamaChatTemplate
 import com.example.map.llm.LocalLlamaClient
 import com.example.map.data.LocalLlmRecommendationRepository
+import com.example.map.data.network.NetworkModule.createRecommendationApi
+import com.example.map.data.network.SearchingMapPlace
+import com.example.map.domain.model.SearchPoint
 import com.example.map.domain.model.UserProfile
 import com.example.map.ui.DivStateRenderer
 import com.example.map.ui.RecommendationViewModel
@@ -37,10 +42,13 @@ import com.yandex.mapkit.map.PlacemarkMapObject
 import com.yandex.mapkit.mapview.MapView
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CompletableDeferred
+import java.io.File
+import java.io.FileOutputStream
 
 class MainActivity : AppCompatActivity(), InputListener {
     private val MAPKIT_API_KEY = "a6f0b6af-0e69-4781-8782-5fa1061829f7"
 
+    private lateinit var client: LocalLlamaClient
     private lateinit var mapHost: FrameLayout
     private lateinit var divContainer: FrameLayout
     private var mapView: MapView? = null
@@ -49,17 +57,29 @@ class MainActivity : AppCompatActivity(), InputListener {
     private val llamaClientDeferred = CompletableDeferred<LocalLlamaClient>()
     private var recommendationMarkers: List<PlacemarkMapObject> = emptyList()
     private var lastRecommendationsSignature: String = ""
+    private lateinit var profile: UserProfile
+    private var resultSerch: List<SearchPoint> = listOf()
+    private var api = createRecommendationApi()
 
     private val viewModel: RecommendationViewModel by viewModels {
         RecommendationViewModel.Factory(
             LocalLlmRecommendationRepository(
                 llamaClientDeferred = llamaClientDeferred,
-                fallback = FakePlacesDataSource(),
+                fallback = FakePlacesDataSource(this@MainActivity),
             ),
         )
     }
 
-
+    private fun refreshRecommendationsFromDatabase() {
+        lifecycleScope.launch {
+            val dataSource = FakePlacesDataSource(this@MainActivity)
+            dataSource.refreshPlaces()
+            // Если есть выбранная локация, обновляем рекомендации
+            viewModel.uiState.value.selectedLocation?.let { location ->
+                viewModel.onLocationSelected(location)
+            }
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -88,7 +108,7 @@ class MainActivity : AppCompatActivity(), InputListener {
             val json = result.data?.getStringExtra(ProfileActivity.EXTRA_PROFILE_JSON).orEmpty()
             if (json.isBlank()) return@registerForActivityResult
 
-            val profile = Gson().fromJson(json, UserProfile::class.java)
+            profile = Gson().fromJson(json, UserProfile::class.java)
             viewModel.setProfile(profile)
         }
 
@@ -100,17 +120,11 @@ class MainActivity : AppCompatActivity(), InputListener {
         // Положи GGUF файл в: app/src/main/assets/models/model.gguf
         lifecycleScope.launch {
             runCatching {
-                val installed = AssetModelInstaller.ensureInstalled(
-                    context = this@MainActivity,
-                    assetPath = "models/model.gguf",
-                    targetFileName = "model.gguf",
-                )
-
-                val client = LocalLlamaClient(
-                    modelPath = installed.file.absolutePath,
+                client = LocalLlamaClient(
+                    modelPath = getModelPath("models/model.gguf", "model.gguf"),
                     template = LlamaChatTemplate.CHATML,
                     systemPrompt = DefaultSystemPrompt.TOUR_GUIDE_RU,
-                )
+                ).also { it.load() }
                 client.load()
                 client.startNewSession()
                 client
@@ -132,6 +146,23 @@ class MainActivity : AppCompatActivity(), InputListener {
                 }
             }
         }
+    }
+    fun getModelPath(assetPath: String, fileName: String): String {
+        val outFile = File(filesDir, fileName)
+
+        if (!outFile.exists()) {
+            assets.open(assetPath).use { input ->
+                FileOutputStream(outFile).use { output ->
+                    input.copyTo(output) // важно: не readBytes()
+                }
+            }
+        }
+
+        return outFile.absolutePath
+    }
+
+    fun setSearchResult(r :List<SearchPoint>){
+        resultSerch = r
     }
 
     private fun renderRecommendationsOnMap(recommendations: List<com.example.map.domain.model.Recommendation>) {
@@ -211,6 +242,10 @@ class MainActivity : AppCompatActivity(), InputListener {
                 longitude = point.longitude,
             ),
         )
+        lifecycleScope.launch{
+            val sea = SearchingMapPlace()
+            Log.d("adfsadsads", resultSerch.toString())
+        }
     }
 
     override fun onMapLongTap(map: Map, point: Point) = Unit
