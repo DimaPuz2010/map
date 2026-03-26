@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import com.example.map.domain.model.UserProfile
+import android.util.Log
 
 class RecommendationViewModel(
     private val repository: RecommendationRepository,
@@ -42,11 +43,23 @@ class RecommendationViewModel(
         onLocationSelected(selected)
     }
 
+    fun toggleRecommendationsCollapsed() {
+        _uiState.update { it.copy(isRecommendationsCollapsed = !it.isRecommendationsCollapsed) }
+    }
+
     private fun requestRecommendations(location: SelectedLocation) {
         viewModelScope.launch {
             val profile = _uiState.value.profile
+            Log.i(
+                "Recommendations",
+                "Requesting recommendations for lat=${location.latitude}, lon=${location.longitude}",
+            )
             runCatching { repository.getRecommendations(location, profile) }
                 .onSuccess { recommendations ->
+                    Log.i(
+                        "Recommendations",
+                        "Received ${recommendations.size} recommendations",
+                    )
                     _uiState.update {
                         it.copy(
                             recommendations = recommendations,
@@ -60,6 +73,7 @@ class RecommendationViewModel(
                     }
                 }
                 .onFailure { error ->
+                    Log.e("Recommendations", "Failed to load recommendations", error)
                     _uiState.update {
                         it.copy(
                             recommendations = emptyList(),
