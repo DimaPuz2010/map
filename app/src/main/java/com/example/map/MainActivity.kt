@@ -21,15 +21,12 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.map.BuildConfig
 import com.example.map.data.Data
 import com.example.map.data.FakePlacesDataSource
+import com.example.map.data.OpenRouterRecommendationRepository
 import com.example.map.domain.model.SelectedLocation
-import com.example.map.llm.AssetModelInstaller
-import com.example.map.llm.DefaultSystemPrompt
-import com.example.map.llm.LlamaChatTemplate
-import com.example.map.llm.LocalLlamaClient
-import com.example.map.data.LocalLlmRecommendationRepository
-import com.example.map.data.network.NetworkModule.createRecommendationApi
+import com.example.map.data.network.NetworkModule
 import com.example.map.data.network.SearchingMapPlace
 import com.example.map.domain.model.SearchPoint
 import com.example.map.domain.model.UserProfile
@@ -52,27 +49,21 @@ import com.yandex.mapkit.map.PlacemarkMapObject
 import com.yandex.mapkit.mapview.MapView
 import com.yandex.runtime.image.ImageProvider
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.CompletableDeferred
-import java.io.File
-import java.io.FileOutputStream
 import java.util.Locale
 
 class MainActivity : AppCompatActivity(), InputListener {
     private val MAPKIT_API_KEY = "a6f0b6af-0e69-4781-8782-5fa1061829f7"
 
-    private lateinit var client: LocalLlamaClient
     private lateinit var mapHost: FrameLayout
     private lateinit var divContainer: FrameLayout
     private lateinit var loadingBar: View
     private var mapView: MapView? = null
     private lateinit var divView: Div2View
     private var selectedPlacemark: PlacemarkMapObject? = null
-    private val llamaClientDeferred = CompletableDeferred<LocalLlamaClient>()
     private var recommendationMarkers: List<PlacemarkMapObject> = emptyList()
     private var lastRecommendationsSignature: String = ""
     private lateinit var profile: UserProfile
     private var resultSerch: List<SearchPoint> = listOf()
-    private var api = createRecommendationApi()
     private var mapKitStarted: Boolean = false
     private lateinit var locationPermissionLauncher: ActivityResultLauncher<Array<String>>
     private var recommendationPinProvider: ImageProvider? = null
@@ -128,8 +119,8 @@ class MainActivity : AppCompatActivity(), InputListener {
 
     private val viewModel: RecommendationViewModel by viewModels {
         RecommendationViewModel.Factory(
-            LocalLlmRecommendationRepository(
-                llamaClientDeferred = llamaClientDeferred,
+            OpenRouterRecommendationRepository(
+                api = NetworkModule.createOpenRouterApi(BuildConfig.OPENROUTER_API_KEY),
                 fallback = FakePlacesDataSource(this@MainActivity),
             ),
         )
@@ -188,24 +179,6 @@ class MainActivity : AppCompatActivity(), InputListener {
             profileLauncher.launch(Intent(this, ProfileActivity::class.java))
         }
 
-        // Установка модели из assets во внутреннее хранилище и загрузка llama.cpp.
-        // Положи GGUF файл в: app/src/main/assets/models/model.gguf
-        lifecycleScope.launch {
-            runCatching {
-                client = LocalLlamaClient(
-                    modelPath = getModelPath("models/model.gguf", "model.gguf"),
-                    template = LlamaChatTemplate.CHATML,
-                    systemPrompt = DefaultSystemPrompt.TOUR_GUIDE_RU,
-                    config = LocalLlamaClient.LlamaConfigOverrides(
-                        contextSize = 4096,
-                        maxTokens = 1024,
-                    ),
-                ).also { it.load() }
-                client.startNewSession()
-                client
-            }.onSuccess { llamaClientDeferred.complete(it) }
-                .onFailure { e -> llamaClientDeferred.completeExceptionally(e) }
-        }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -223,20 +196,6 @@ class MainActivity : AppCompatActivity(), InputListener {
             }
         }
     }
-    fun getModelPath(assetPath: String, fileName: String): String {
-        val outFile = File(filesDir, fileName)
-
-        if (!outFile.exists()) {
-            assets.open(assetPath).use { input ->
-                FileOutputStream(outFile).use { output ->
-                    input.copyTo(output) // важно: не readBytes()
-                }
-            }
-        }
-
-        return outFile.absolutePath
-    }
-
     fun setSearchResult(r :List<SearchPoint>){
         resultSerch = r
     }
@@ -353,9 +312,6 @@ class MainActivity : AppCompatActivity(), InputListener {
             mapView?.onStop()
             runCatching { MapKitFactory.getInstance().onStop() }
             mapKitStarted = false
-        }
-        if (llamaClientDeferred.isCompleted) {
-            runCatching { llamaClientDeferred.getCompleted().close() }
         }
         super.onStop()
     }
