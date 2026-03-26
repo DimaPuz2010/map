@@ -196,8 +196,11 @@ class MainActivity : AppCompatActivity(), InputListener {
                     modelPath = getModelPath("models/model.gguf", "model.gguf"),
                     template = LlamaChatTemplate.CHATML,
                     systemPrompt = DefaultSystemPrompt.TOUR_GUIDE_RU,
+                    config = LocalLlamaClient.LlamaConfigOverrides(
+                        contextSize = 4096,
+                        maxTokens = 1024,
+                    ),
                 ).also { it.load() }
-                client.load()
                 client.startNewSession()
                 client
             }.onSuccess { llamaClientDeferred.complete(it) }

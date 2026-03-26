@@ -30,6 +30,10 @@ class LocalLlmRecommendationRepository(
     private val generationMutex = Mutex()
     private val gson = Gson()
 
+    companion object {
+        private const val TAG = "LlmRepo"
+    }
+
     override suspend fun getRecommendations(
         location: SelectedLocation,
         profile: UserProfile,
@@ -38,10 +42,7 @@ class LocalLlmRecommendationRepository(
             val llama = llamaClientDeferred.await()
 
             generationMutex.withLock {
-                Log.i(
-                    "Recommendations",
-                    "LLM generation start for lat=${location.latitude}, lon=${location.longitude}",
-                )
+                Log.i(TAG, "=== LLM START === lat=${location.latitude}, lon=${location.longitude}")
                 llama.startNewSession()
 
                 val prompt = RecommendationPromptBuilder.build(
@@ -52,16 +53,34 @@ class LocalLlmRecommendationRepository(
                         maxRadiusMeters = 8_000,
                     ),
                 )
+                Log.d(TAG, "--- PROMPT (${prompt.length} chars) ---\n$prompt")
 
+                val startMs = System.currentTimeMillis()
                 val raw = llama.generate(prompt)
-                Log.i("Recommendations", "LLM raw response length=${raw.length}")
-                val parsedPlaces = parsePlacesJson(raw)
-                Log.i("Recommendations", "LLM parsed places=${parsedPlaces.size}")
+                val elapsedMs = System.currentTimeMillis() - startMs
+
+                Log.i(TAG, "--- RAW RESPONSE (${raw.length} chars, ${elapsedMs}ms) ---")
+                // Android logcat обрезает строки > 4096 байт, бьём на части
+                raw.chunked(3000).forEachIndexed { i, chunk ->
+                    Log.d(TAG, "[raw:$i] $chunk")
+                }
+
+                val extracted = extractJsonObject(raw)
+                if (extracted == null) {
+                    Log.w(TAG, "--- JSON EXTRACT FAILED: no {...} found in response ---")
+                } else {
+                    Log.d(TAG, "--- EXTRACTED JSON (${extracted.length} chars) ---\n$extracted")
+                }
+
+                val parsedPlaces = parsePlacesJson(raw, extracted)
                 if (parsedPlaces.isEmpty()) {
-                    // Используем данные из базы данных через fallback
-                    Log.w("Recommendations", "LLM returned empty list, falling back to DB")
+                    Log.w(TAG, "=== LLM FALLBACK === parsed 0 places → using FakePlacesDataSource")
                     fallback.recommend(location, profile)
                 } else {
+                    Log.i(TAG, "=== LLM SUCCESS === parsed ${parsedPlaces.size} places:")
+                    parsedPlaces.forEachIndexed { i, p ->
+                        Log.i(TAG, "  [${i + 1}] ${p.name} (${p.category}) lat=${p.latitude} lon=${p.longitude} rating=${p.rating}")
+                    }
                     parsedPlaces.mapIndexed { idx, placeDto ->
                         placeToRecommendation(
                             place = placeDto,
@@ -71,20 +90,21 @@ class LocalLlmRecommendationRepository(
                     }
                 }
             }
-        }.getOrElse {
-            // В случае ошибки используем данные из базы данных
-            Log.e("Recommendations", "LLM failed, falling back to DB", it)
+        }.getOrElse { e ->
+            Log.e(TAG, "=== LLM ERROR === falling back to FakePlacesDataSource", e)
             fallback.recommend(location, profile)
         }
     }
 
-    private fun parsePlacesJson(raw: String): List<LlmPlaceDto> {
-        val json = extractJsonObject(raw) ?: return emptyList()
-
+    private fun parsePlacesJson(raw: String, extracted: String? = extractJsonObject(raw)): List<LlmPlaceDto> {
+        if (extracted == null) return emptyList()
         return runCatching {
-            val response = gson.fromJson(json, LlmRecommendationsResponse::class.java)
+            val response = gson.fromJson(extracted, LlmRecommendationsResponse::class.java)
             response.places
-        }.getOrElse { emptyList() }
+        }.getOrElse { e ->
+            Log.w(TAG, "--- JSON PARSE FAILED: ${e.message} ---")
+            emptyList()
+        }
     }
 
     private fun placeToRecommendation(
