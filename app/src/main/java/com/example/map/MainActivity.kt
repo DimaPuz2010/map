@@ -22,7 +22,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.map.BuildConfig
-import com.example.map.data.Data
 import com.example.map.data.FakePlacesDataSource
 import com.example.map.data.OpenRouterRecommendationRepository
 import com.example.map.domain.model.SelectedLocation

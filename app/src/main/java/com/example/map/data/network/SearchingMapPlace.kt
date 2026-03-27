@@ -1,9 +1,7 @@
 package com.example.map.data.network
 
-import android.util.Log
 import com.example.map.MainActivity
 import com.example.map.domain.model.SearchPoint
-import com.example.map.llm.LocalLlamaClient
 import com.yandex.mapkit.geometry.BoundingBox
 import com.yandex.mapkit.geometry.Geometry
 import com.yandex.mapkit.geometry.Point
@@ -13,12 +11,10 @@ import com.yandex.mapkit.search.SearchManagerType
 import com.yandex.mapkit.search.SearchOptions
 import com.yandex.mapkit.search.Session
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import kotlin.math.cos
 
 class SearchingMapPlace {
-    private var llama: LocalLlamaClient? = null
     val searchManager = SearchFactory.getInstance().createSearchManager(SearchManagerType.COMBINED)
     val searchOptions = SearchOptions().apply {
         searchTypes = 2
