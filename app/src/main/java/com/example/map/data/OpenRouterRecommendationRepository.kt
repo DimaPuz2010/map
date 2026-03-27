@@ -24,7 +24,7 @@ import kotlin.math.sqrt
 class OpenRouterRecommendationRepository(
     private val api: OpenRouterApi,
     private val fallback: FakePlacesDataSource,
-    private val model: String = "openrouter/free",
+    private val model: String = "nvidia/nemotron-3-nano-30b-a3b:free",
     private val maxPlaces: Int = 5,
 ) : RecommendationRepository {
 
