@@ -119,22 +119,12 @@ class MainActivity : AppCompatActivity(), InputListener {
     private val viewModel: RecommendationViewModel by viewModels {
         RecommendationViewModel.Factory(
             OpenRouterRecommendationRepository(
-                api = NetworkModule.createOpenRouterApi(BuildConfig.OPENROUTER_API_KEY),
+                api = NetworkModule.createOpenRouterApi(/*BuildConfig.OPENROUTER_API_KEY*/ "sk-or-v1-60b80336bf4c5b7b23ef7"+"37de5b5da7167e14c52a3940462e2cf9a7bd622166f"),
                 fallback = FakePlacesDataSource(this@MainActivity),
             ),
         )
     }
 
-    private fun refreshRecommendationsFromDatabase() {
-        lifecycleScope.launch {
-            val dataSource = FakePlacesDataSource(this@MainActivity)
-            dataSource.refreshPlaces()
-            // Если есть выбранная локация, обновляем рекомендации
-            viewModel.uiState.value.selectedLocation?.let { location ->
-                viewModel.onLocationSelected(location)
-            }
-        }
-    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

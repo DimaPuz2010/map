@@ -62,9 +62,20 @@
         android:layout_marginTop="12dp"
         android:textAppearance="?attr/textAppearanceBodyMedium"
         android:textColor="?attr/colorOnSurface"
-        tools:text="Статус: ожидание"
-        app:layout_constraintTop_toBottomOf="@id/loadProfileBtn"
+        app:layout_constraintEnd_toStartOf="@+id/txCreateProfile"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/loadProfileBtn"
+        tools:text="Статус: ожидание" />
 
+    <TextView
+        android:id="@+id/txCreateProfile"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:textColor="?attr/colorOnSurface"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/profileStatusTv"
+        app:layout_constraintTop_toBottomOf="@id/loadProfileBtn"
+        tools:text="Создать аккаунт"
+        android:gravity="end"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

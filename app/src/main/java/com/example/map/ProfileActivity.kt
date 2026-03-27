@@ -30,6 +30,14 @@ class ProfileActivity : AppCompatActivity() {
         val passwordEt = findViewById<EditText>(R.id.passwordEt)
         val loadBtn = findViewById<MaterialButton>(R.id.loadProfileBtn)
         val statusTv = findViewById<TextView>(R.id.profileStatusTv)
+        val createTx = findViewById<TextView>(R.id.txCreateProfile)
+
+        createTx.setText("Создать аккаунт")
+        createTx.setOnClickListener {
+            val intent = Intent(this, CreateProfileActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
 
         loadBtn.setOnClickListener {
             val email = emailEt.text?.toString()?.trim().orEmpty()

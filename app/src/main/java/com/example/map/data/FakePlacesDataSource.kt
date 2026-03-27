@@ -87,9 +87,9 @@ class FakePlacesDataSource(
             return emptyList()
         }
 
-        val preferred = tokenizeList(profile.preferredCategories)
-        val disliked = tokenizeList(profile.dislikedCategories)
-        val history = tokenizeList(profile.history)
+        val preferred = tokenizeList(profile.preferredCategories?:"")
+        val disliked = tokenizeList(profile.dislikedCategories?:"")
+        val history = tokenizeList(profile.history?:"")
 
         return allPlaces
             .map { place ->
@@ -161,7 +161,7 @@ class FakePlacesDataSource(
         val categoryReason = when {
             preferred.contains(categoryKey) -> "Matches your preferred ${category.lowercase()} category."
             disliked.contains(categoryKey) -> "Kept only as a nearby fallback option."
-            else -> "Fits the ${profile.travelStyle.lowercase()} profile."
+            else -> "Fits the ${profile.travelStyle?.lowercase()} profile."
         }
         return "$categoryReason Around $distance m from the selected point."
     }
