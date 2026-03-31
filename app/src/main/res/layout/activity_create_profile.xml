@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:fillViewport="true"
     android:background="@color/white">
 
@@ -64,19 +65,25 @@
                 android:maxLines="1"
                 android:imeOptions="actionDone" />
         </com.google.android.material.textfield.TextInputLayout>
-        <com.google.android.material.textfield.TextInputLayout
+<!--        <com.google.android.material.textfield.TextInputLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginBottom="8dp"-->
+<!--            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">-->
+
+<!--            <com.google.android.material.textfield.TextInputEditText-->
+<!--                android:id="@+id/etPreferredCategories"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:hint="Предпочитаемые категории (через запятую)"-->
+<!--                android:inputType="text" />-->
+<!--        </com.google.android.material.textfield.TextInputLayout>-->
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/preferChip"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etPreferredCategories"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Предпочитаемые категории (через запятую)"
-                android:inputType="text" />
-        </com.google.android.material.textfield.TextInputLayout>
+            app:singleLine="false"
+            app:chipSpacing="8dp"/>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

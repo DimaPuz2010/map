@@ -1,8 +1,10 @@
 package com.example.map
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
@@ -16,10 +18,15 @@ import com.example.map.data.Data
 import com.example.map.data.network.NetworkModule
 import com.example.map.data.network.model.Auth
 import com.example.map.domain.model.UserProfile
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
-
+import kotlin.collections.forEach
+enum class State {
+    LIKE, DISLIKE, NONE
+}
 class CreateProfileActivity : AppCompatActivity() {
     private lateinit var etDisplayName: TextInputEditText
     private lateinit var email: TextInputEditText
@@ -40,13 +47,66 @@ class CreateProfileActivity : AppCompatActivity() {
 
         initViews()
         setupListeners()
-    }
 
+        val categories = listOf("Музыка", "Спорт", "Фильмы", "Игры")
+
+
+        val chipGroup = findViewById<ChipGroup>(R.id.preferChip)
+        val categoryStates = mutableMapOf<String, State>()
+        categories.forEach { name ->
+            categoryStates[name] = State.NONE
+
+            val chip = createChip(this, name)
+
+            chip.setOnClickListener {
+                val current = categoryStates[name]
+
+                val newState = when (current) {
+                    State.NONE -> State.LIKE
+                    State.LIKE -> State.DISLIKE
+                    State.DISLIKE -> State.NONE
+                    null -> State.NONE
+                }
+
+                categoryStates[name] = newState
+                updateChipStyle(chip, newState)
+            }
+
+            chipGroup.addView(chip)
+        }
+    }
+    fun createChip(context: Context, text: String): Chip {
+        return Chip(context).apply {
+            this.text = text
+            isClickable = true
+            isCheckable = false
+            setChipBackgroundColorResource(R.color.gray)
+        }
+    }
+    fun updateChipStyle(chip: Chip, state: State) {
+        when (state) {
+            State.LIKE -> {
+                chip.setChipBackgroundColorResource(R.color.white)
+                chip.setTextColor(Color.GREEN)
+                chip.text = "❤️ ${chip.text}"
+            }
+            State.DISLIKE -> {
+                chip.setChipBackgroundColorResource(R.color.black)
+                chip.setTextColor(Color.RED)
+                chip.text = "❌ ${chip.text}"
+            }
+            State.NONE -> {
+                chip.setChipBackgroundColorResource(R.color.gray)
+                chip.setTextColor(Color.BLACK)
+                chip.text = chip.text.toString().replace("❤️ ", "").replace("❌ ", "")
+            }
+        }
+    }
     private fun initViews() {
         etDisplayName = findViewById(R.id.etDisplayName)
         email = findViewById(R.id.etEmail)
         password = findViewById(R.id.etPassword)
-        etPreferredCategories = findViewById(R.id.etPreferredCategories)
+//        etPreferredCategories = findViewById(R.id.etPreferredCategories)
         etDislikedCategories = findViewById(R.id.etDislikedCategories)
         etTravelStyle = findViewById(R.id.etTravelStyle)
         btnCancel = findViewById(R.id.btnCancel)
@@ -93,7 +153,7 @@ class CreateProfileActivity : AppCompatActivity() {
                             userProfile = UserProfile(
                                 id = profileResp[0].id,
                                 displayName = etDisplayName.text.toString(),
-                                preferredCategories = etPreferredCategories.text.toString(),
+                                preferredCategories = /*etPreferredCategories.text.toString()*/"",
                                 dislikedCategories = etDislikedCategories.text.toString(),
                                 travelStyle = etTravelStyle.text.toString(),
                                 budgetLevel = profileResp[0].budgetLevel,
