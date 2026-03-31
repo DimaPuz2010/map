@@ -52,7 +52,6 @@ import java.util.Locale
 
 class MainActivity : AppCompatActivity(), InputListener {
     private val MAPKIT_API_KEY = "a6f0b6af-0e69-4781-8782-5fa1061829f7"
-
     private lateinit var mapHost: FrameLayout
     private lateinit var divContainer: FrameLayout
     private lateinit var loadingBar: View
@@ -67,6 +66,7 @@ class MainActivity : AppCompatActivity(), InputListener {
     private lateinit var locationPermissionLauncher: ActivityResultLauncher<Array<String>>
     private var recommendationPinProvider: ImageProvider? = null
     private var selectedPinProvider: ImageProvider? = null
+    val mapKitFactory= MapKitFactory()
     private val recommendationTapListener = object : MapObjectTapListener {
         override fun onMapObjectTap(mapObject: MapObject, point: Point): Boolean {
             val recommendation = mapObject.userData as? com.example.map.domain.model.Recommendation
@@ -119,7 +119,7 @@ class MainActivity : AppCompatActivity(), InputListener {
     private val viewModel: RecommendationViewModel by viewModels {
         RecommendationViewModel.Factory(
             OpenRouterRecommendationRepository(
-                api = NetworkModule.createOpenRouterApi(/*BuildConfig.OPENROUTER_API_KEY*/ "sk-or-v1-60b80336bf4c5b7b23ef7"+"37de5b5da7167e14c52a3940462e2cf9a7bd622166f"),
+                api = NetworkModule.createOpenRouterApi(/*BuildConfig.OPENROUTER_API_KEY*/ "Bearer sk-or-v1-60b80336bf4c5b7b23ef7"+"37de5b5da7167e14c52a3940462e2cf9a7bd622166f"),
                 fallback = FakePlacesDataSource(this@MainActivity),
             ),
         )

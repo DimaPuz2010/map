@@ -110,31 +110,6 @@ class FakePlacesDataSource(
             .also { Log.i("Recommendations", "Fallback result size=${it.size}") }
     }
 
-    /**
-     * Обновляет данные из базы данных (можно вызвать принудительно)
-     */
-    suspend fun refreshPlaces() {
-        try {
-            val api = createRecommendationApi()
-            if (api != null) {
-                val recommendations = api.getRecommendationsFromDb(Data.userAuth)
-                _places.value = if (recommendations.isNotEmpty()) recommendations else seedPlaces
-                loadAttempted = true
-                Log.i(
-                    "Recommendations",
-                    "Refreshed ${recommendations.size} places from DB, seedUsed=${recommendations.isEmpty()}",
-                )
-            } else {
-                _places.value = seedPlaces
-                loadAttempted = true
-                Log.w("Recommendations", "API is null on refresh, using seed places")
-            }
-        } catch (e: Exception) {
-            Log.e("Recommendations", "Error refreshing recommendations", e)
-            _places.value = seedPlaces
-            loadAttempted = true
-        }
-    }
 
     private fun score(
         recommendation: Recommendation,

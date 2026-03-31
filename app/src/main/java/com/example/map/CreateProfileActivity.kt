@@ -2,12 +2,14 @@ package com.example.map
 
 import android.app.Activity
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
 import androidx.lifecycle.lifecycleScope
 import com.example.map.ProfileActivity.Companion.EXTRA_PROFILE_JSON
 import com.example.map.data.Data
@@ -28,10 +30,13 @@ class CreateProfileActivity : AppCompatActivity() {
     private lateinit var btnCancel: Button
     private lateinit var btnSave: Button
     private lateinit var statusTv: TextView
+    private lateinit var preference: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_profile)
+
+        preference = getPreferences(MODE_PRIVATE)
 
         initViews()
         setupListeners()
@@ -71,10 +76,10 @@ class CreateProfileActivity : AppCompatActivity() {
                         var loginResp = api.singUp(
                             auth = Auth(email = email.text.toString(), password = password.text.toString()),
                         )
-                        var authHeader = "Bearer ${loginResp.access_token}"
+                        var authHeader = "${loginResp.access_token}"
 
 
-                        Data.userAuth = loginResp.access_token.toString()
+                        Data.userAuth = authHeader
 
 
 
@@ -121,7 +126,12 @@ class CreateProfileActivity : AppCompatActivity() {
         val intent = Intent(this, MainActivity::class.java).apply {
             putExtra(EXTRA_PROFILE_JSON, json)
         }
+        preference.edit {
+            putString("user_auth", Data.userAuth)
+            putString("user_id", "eq." + profile.id)
+        }
         setResult(Activity.RESULT_OK, intent)
+        startActivity(intent)
         finish()
     }
     private fun validateForm(): Boolean {

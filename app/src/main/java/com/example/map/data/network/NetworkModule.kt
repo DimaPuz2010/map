@@ -43,7 +43,7 @@ object NetworkModule {
                     .addInterceptor { chain ->
                         chain.proceed(
                             chain.request().newBuilder()
-                                .header("Authorization", "Bearer $apiKey")
+                                .header("Authorization", apiKey)
                                 .header("HTTP-Referer", "https://github.com/example/map")
                                 .header("X-Title", "Map Recommendations")
                                 .build(),
