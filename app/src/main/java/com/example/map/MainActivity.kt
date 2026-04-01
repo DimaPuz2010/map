@@ -1,17 +1,16 @@
 package com.example.map
 
+import RecommendationViewRenderer
 import android.Manifest
-import android.os.Bundle
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.os.Bundle
 import android.util.Log
-import android.widget.FrameLayout
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.Toast
-import com.google.android.material.button.MaterialButton
-import com.google.gson.Gson
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,21 +20,16 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.example.map.BuildConfig
 import com.example.map.data.FakePlacesDataSource
 import com.example.map.data.OpenRouterRecommendationRepository
-import com.example.map.domain.model.SelectedLocation
 import com.example.map.data.network.NetworkModule
 import com.example.map.data.network.SearchingMapPlace
 import com.example.map.domain.model.SearchPoint
+import com.example.map.domain.model.SelectedLocation
 import com.example.map.domain.model.UserProfile
-import com.example.map.ui.DivStateRenderer
 import com.example.map.ui.RecommendationViewModel
-import com.yandex.div.DivDataTag
-import com.yandex.div.coil.CoilDivImageLoader
-import com.yandex.div.core.Div2Context
-import com.yandex.div.core.DivConfiguration
-import com.yandex.div.core.view2.Div2View
+import com.google.android.material.button.MaterialButton
+import com.google.gson.Gson
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
@@ -56,7 +50,6 @@ class MainActivity : AppCompatActivity(), InputListener {
     private lateinit var divContainer: FrameLayout
     private lateinit var loadingBar: View
     private var mapView: MapView? = null
-    private lateinit var divView: Div2View
     private var selectedPlacemark: PlacemarkMapObject? = null
     private var recommendationMarkers: List<PlacemarkMapObject> = emptyList()
     private var lastRecommendationsSignature: String = ""
@@ -66,7 +59,7 @@ class MainActivity : AppCompatActivity(), InputListener {
     private lateinit var locationPermissionLauncher: ActivityResultLauncher<Array<String>>
     private var recommendationPinProvider: ImageProvider? = null
     private var selectedPinProvider: ImageProvider? = null
-    val mapKitFactory= MapKitFactory()
+    private lateinit var renderer: RecommendationViewRenderer
     private val recommendationTapListener = object : MapObjectTapListener {
         override fun onMapObjectTap(mapObject: MapObject, point: Point): Boolean {
             val recommendation = mapObject.userData as? com.example.map.domain.model.Recommendation
@@ -140,20 +133,24 @@ class MainActivity : AppCompatActivity(), InputListener {
         divContainer = findViewById(R.id.divContainer)
         loadingBar = findViewById(R.id.loadingBar)
 
+
+
         locationPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { _ ->
                 if (isMapKitConfigured) startMapKitSafely()
             }
         requestLocationPermissionIfNeeded()
 
-        divView = createDivView()
-        divContainer.addView(divView)
 
         if (isMapKitConfigured) {
             setupMap()
         }
         viewModel.onMapReady(isMapKitConfigured)
-
+        renderer = RecommendationViewRenderer(
+            context = this,
+            onMoveToPoint = { lat, lon -> moveToPoint(lat, lon) },
+            onToggle = { viewModel.toggleRecommendationsCollapsed() }
+        )
         val profileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode != RESULT_OK) return@registerForActivityResult
 
@@ -172,7 +169,7 @@ class MainActivity : AppCompatActivity(), InputListener {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { uiState ->
-                    divView.setData(DivStateRenderer.build(uiState), DivDataTag("main_state"))
+                    renderer.render(divContainer, uiState)
                     loadingBar.visibility = if (uiState.isLoading) View.VISIBLE else View.GONE
                     if (!uiState.isMapReady || uiState.isLoading || uiState.errorMessage != null) return@collect
 
@@ -216,29 +213,6 @@ class MainActivity : AppCompatActivity(), InputListener {
             placemark.userData = rec
             placemark.addTapListener(recommendationTapListener)
             placemark
-        }
-    }
-    private fun createDivView(): Div2View {
-        val configuration = DivConfiguration.Builder(CoilDivImageLoader(this))
-            .actionHandler(
-                NotificationDivActionHandler(
-                    onMoveToPoint = { lat, lon -> moveToPoint(lat, lon) },
-                    onToggleCards = { viewModel.toggleRecommendationsCollapsed() },
-                ),
-            )
-            .build()
-
-        return Div2View(
-            Div2Context(
-                baseContext = this,
-                configuration = configuration,
-                lifecycleOwner = this,
-            ),
-        ).apply {
-            layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-            )
         }
     }
 
