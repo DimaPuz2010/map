@@ -1,24 +1,23 @@
 package com.example.map
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
+import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
 import androidx.lifecycle.lifecycleScope
+import com.example.map.data.Data
 import com.example.map.data.network.NetworkModule
 import com.example.map.data.network.model.Auth
 import com.example.map.domain.model.UserProfile
+import com.google.android.material.button.MaterialButton
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
-import android.widget.EditText
-import com.google.android.material.button.MaterialButton
-import android.widget.TextView
-import com.example.map.data.Data
-import androidx.core.content.edit
 
 class ProfileActivity : AppCompatActivity() {
     private lateinit var preference: SharedPreferences
@@ -61,11 +60,6 @@ class ProfileActivity : AppCompatActivity() {
                     Toast.makeText(this@ProfileActivity, e.message ?: "Auth failed", Toast.LENGTH_LONG).show()
                 }
             }
-
-
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            finish()
 
         }else{
 
@@ -116,19 +110,17 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
-    private fun load(){
-
-    }
-
     private fun setResultOk(profile: UserProfile) {
         val json = Gson().toJson(profile)
         val intent =  Intent(this, MainActivity::class.java).apply {
             putExtra(EXTRA_PROFILE_JSON, json)
         }
+        Log.d("asd", Data.userAuth)
         preference.edit {
             putString("user_auth", Data.userAuth)
             putString("user_id", "eq."+profile.id)
         }
+        Data.userId = "eq."+profile.id
 
         startActivity(intent)
         setResult(Activity.RESULT_OK, intent)

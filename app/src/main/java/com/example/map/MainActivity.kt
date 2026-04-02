@@ -162,7 +162,7 @@ class MainActivity : AppCompatActivity(), InputListener {
         }
 
         findViewById<MaterialButton>(R.id.profileBtn).setOnClickListener {
-            profileLauncher.launch(Intent(this, ProfileActivity::class.java))
+            profileLauncher.launch(Intent(this, EditProfileActivity::class.java))
         }
 
 

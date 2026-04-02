@@ -15,6 +15,7 @@ import androidx.core.content.edit
 import androidx.lifecycle.lifecycleScope
 import com.example.map.ProfileActivity.Companion.EXTRA_PROFILE_JSON
 import com.example.map.data.Data
+import com.example.map.data.Data.categories
 import com.example.map.data.network.NetworkModule
 import com.example.map.data.network.model.Auth
 import com.example.map.domain.model.UserProfile
@@ -23,21 +24,17 @@ import com.google.android.material.chip.ChipGroup
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
-import kotlin.collections.forEach
-enum class State {
-    LIKE, DISLIKE, NONE
-}
+
 class CreateProfileActivity : AppCompatActivity() {
     private lateinit var etDisplayName: TextInputEditText
     private lateinit var email: TextInputEditText
     private lateinit var password: TextInputEditText
-    private lateinit var etPreferredCategories: TextInputEditText
-    private lateinit var etDislikedCategories: TextInputEditText
     private lateinit var etTravelStyle: TextInputEditText
     private lateinit var btnCancel: Button
     private lateinit var btnSave: Button
     private lateinit var statusTv: TextView
     private lateinit var preference: SharedPreferences
+    private val categoryStates = mutableMapOf<String, State>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,24 +45,18 @@ class CreateProfileActivity : AppCompatActivity() {
         initViews()
         setupListeners()
 
-        val categories = listOf("Музыка", "Спорт", "Фильмы", "Игры")
-
-
         val chipGroup = findViewById<ChipGroup>(R.id.preferChip)
-        val categoryStates = mutableMapOf<String, State>()
         categories.forEach { name ->
             categoryStates[name] = State.NONE
 
             val chip = createChip(this, name)
 
             chip.setOnClickListener {
-                val current = categoryStates[name]
-
-                val newState = when (current) {
+                val newState = when (categoryStates[name]) {
                     State.NONE -> State.LIKE
                     State.LIKE -> State.DISLIKE
                     State.DISLIKE -> State.NONE
-                    null -> State.NONE
+                    else -> State.NONE
                 }
 
                 categoryStates[name] = newState
@@ -74,8 +65,9 @@ class CreateProfileActivity : AppCompatActivity() {
 
             chipGroup.addView(chip)
         }
+
     }
-    fun createChip(context: Context, text: String): Chip {
+    private fun createChip(context: Context, text: String): Chip {
         return Chip(context).apply {
             this.text = text
             isClickable = true
@@ -83,22 +75,27 @@ class CreateProfileActivity : AppCompatActivity() {
             setChipBackgroundColorResource(R.color.gray)
         }
     }
-    fun updateChipStyle(chip: Chip, state: State) {
+
+    private fun updateChipStyle(chip: Chip, state: State) {
+        val cleanText = chip.text.toString()
+            .replace("❤️ ", "")
+            .replace("❌ ", "")
+
         when (state) {
             State.LIKE -> {
                 chip.setChipBackgroundColorResource(R.color.white)
                 chip.setTextColor(Color.GREEN)
-                chip.text = "❤️ ${chip.text}"
+                chip.text = "❤️ $cleanText"
             }
             State.DISLIKE -> {
                 chip.setChipBackgroundColorResource(R.color.black)
                 chip.setTextColor(Color.RED)
-                chip.text = "❌ ${chip.text}"
+                chip.text = "❌ $cleanText"
             }
             State.NONE -> {
                 chip.setChipBackgroundColorResource(R.color.gray)
                 chip.setTextColor(Color.BLACK)
-                chip.text = chip.text.toString().replace("❤️ ", "").replace("❌ ", "")
+                chip.text = cleanText
             }
         }
     }
@@ -106,8 +103,6 @@ class CreateProfileActivity : AppCompatActivity() {
         etDisplayName = findViewById(R.id.etDisplayName)
         email = findViewById(R.id.etEmail)
         password = findViewById(R.id.etPassword)
-//        etPreferredCategories = findViewById(R.id.etPreferredCategories)
-        etDislikedCategories = findViewById(R.id.etDislikedCategories)
         etTravelStyle = findViewById(R.id.etTravelStyle)
         btnCancel = findViewById(R.id.btnCancel)
         btnSave = findViewById(R.id.btnSave)
@@ -136,7 +131,7 @@ class CreateProfileActivity : AppCompatActivity() {
                         var loginResp = api.singUp(
                             auth = Auth(email = email.text.toString(), password = password.text.toString()),
                         )
-                        var authHeader = "${loginResp.access_token}"
+                        var authHeader = "Bearer ${loginResp.access_token}"
 
 
                         Data.userAuth = authHeader
@@ -145,16 +140,22 @@ class CreateProfileActivity : AppCompatActivity() {
 
                         val profileResp = api.getUser(
                             auth = authHeader,
-                            id = ("eq."+loginResp.user?.id.toString())
+                            id = ("eq."+loginResp.user?.id)
                         )
+
+                        val liked = categoryStates.filterValues { it == State.LIKE }.keys
+                        val disliked = categoryStates.filterValues { it == State.DISLIKE }.keys
+
+                        val likedStr = liked.joinToString(",")
+                        val dislikedStr = disliked.joinToString(",")
                         val changedProfile = api.changeProfile(
                             auth = authHeader,
                             id = ("eq."+loginResp.user?.id.toString()),
                             userProfile = UserProfile(
                                 id = profileResp[0].id,
                                 displayName = etDisplayName.text.toString(),
-                                preferredCategories = /*etPreferredCategories.text.toString()*/"",
-                                dislikedCategories = etDislikedCategories.text.toString(),
+                                preferredCategories = likedStr,
+                                dislikedCategories = dislikedStr,
                                 travelStyle = etTravelStyle.text.toString(),
                                 budgetLevel = profileResp[0].budgetLevel,
                                 companionType = profileResp[0].companionType,
@@ -190,8 +191,9 @@ class CreateProfileActivity : AppCompatActivity() {
             putString("user_auth", Data.userAuth)
             putString("user_id", "eq." + profile.id)
         }
-        setResult(Activity.RESULT_OK, intent)
+        Data.userId = "eq."+profile.id
         startActivity(intent)
+        setResult(Activity.RESULT_OK, intent)
         finish()
     }
     private fun validateForm(): Boolean {
