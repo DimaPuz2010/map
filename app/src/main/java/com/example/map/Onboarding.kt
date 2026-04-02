@@ -2,28 +2,85 @@ package com.example.map
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
+import android.view.View
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.button.MaterialButton
 
 class Onboarding : AppCompatActivity() {
-    private lateinit var continueB: MaterialButton
+    private lateinit var title: TextView
+    private lateinit var subtitle: TextView
+    private lateinit var button: MaterialButton
+    private lateinit var icon: ImageView
+    private lateinit var dots: List<View>
+
+    private var step = 0
+
+    private val pages = listOf(
+        "Открой новые места" to "Находи интересные локации рядом с тобой",
+        "Просто нажми на карту" to "Выбери точку и получи рекомендации",
+        "Настрой профиль" to "Мы подберем места под твой стиль"
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_onboarding)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+
+        title = findViewById(R.id.title)
+        subtitle = findViewById(R.id.subtitle)
+        button = findViewById(R.id.onbContinue)
+        icon = findViewById(R.id.illustrationIcon)
+        dots = listOf(
+            findViewById(R.id.dot1),
+            findViewById(R.id.dot2),
+            findViewById(R.id.dot3)
+        )
+        render()
+
+        button.setOnClickListener {
+            step++
+            if (step >= pages.size) {
+                openProfile()
+            } else {
+                render()
+            }
         }
-        continueB = findViewById(R.id.onbContinue)
-        continueB.setOnClickListener {
-            val intent = Intent(this, ProfileActivity::class.java)
-            startActivity(intent)
-            finish()
+    }
+
+    private fun render() {
+        val page = pages[step]
+        title.text = page.first
+        subtitle.text = page.second
+
+        button.text = if (step == pages.lastIndex) "Начать" else "Далее"
+
+        val iconRes = when (step) {
+            0 -> android.R.drawable.ic_menu_compass
+            1 -> android.R.drawable.ic_menu_mapmode
+            else -> android.R.drawable.ic_menu_myplaces
+        }
+        updateDots()
+        icon.setImageResource(iconRes)
+    }
+
+    private fun openProfile() {
+        startActivity(Intent(this, ProfileActivity::class.java))
+        finish()
+    }
+    private fun updateDots() {
+        dots.forEachIndexed { index, view ->
+            val isActive = index == step
+
+            view.setBackgroundResource(
+                if (isActive) R.drawable.dot_active else R.drawable.dot_inactive
+            )
+
+            view.animate()
+                .scaleX(if (isActive) 1.3f else 1f)
+                .scaleY(if (isActive) 1.3f else 1f)
+                .setDuration(150)
+                .start()
         }
     }
 }
