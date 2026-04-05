@@ -13,6 +13,5 @@ data class OpenRouterChoice(
 data class OpenRouterAssistantMessage(
     val role: String = "assistant",
     val content: String? = null,
-    // Поле reasoning заполняется reasoning-моделями (DeepSeek R1, Nemotron и др.)
     val reasoning: String? = null,
 )

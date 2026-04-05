@@ -34,8 +34,6 @@ class EditProfileActivity : AppCompatActivity() {
 
     private var currentProfile: UserProfile? = null
 
-    // категории
-
 
     private val categoryStates = mutableMapOf<String, State>()
 
@@ -56,7 +54,6 @@ class EditProfileActivity : AppCompatActivity() {
         }
     }
 
-    // ---------------- INIT ----------------
 
     private fun initViews() {
         etName = findViewById(R.id.etName)
@@ -66,7 +63,6 @@ class EditProfileActivity : AppCompatActivity() {
         progress = findViewById(R.id.progress)
     }
 
-    // ---------------- LOAD ----------------
 
     private fun loadProfile() {
         val id = Data.userId
@@ -93,7 +89,6 @@ class EditProfileActivity : AppCompatActivity() {
         }
     }
 
-    // ---------------- CHIPS ----------------
 
     private fun setupChips(profile: UserProfile) {
         chipGroup.removeAllViews()
@@ -140,7 +135,6 @@ class EditProfileActivity : AppCompatActivity() {
             ?: emptySet()
     }
 
-    // ---------------- SAVE ----------------
 
     private fun saveProfile() {
         val auth = Data.userAuth
@@ -178,7 +172,6 @@ class EditProfileActivity : AppCompatActivity() {
         }
     }
 
-    // ---------------- UI ----------------
 
     private fun showLoading(show: Boolean) {
         progress.visibility = if (show) View.VISIBLE else View.GONE
@@ -197,7 +190,6 @@ class EditProfileActivity : AppCompatActivity() {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }
 
-    // ---------------- CHIP HELPERS ----------------
 
     private fun createChip(context: Context, text: String): Chip {
         return Chip(context).apply {

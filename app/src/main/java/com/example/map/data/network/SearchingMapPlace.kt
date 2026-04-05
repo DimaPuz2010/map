@@ -46,7 +46,7 @@ class SearchingMapPlace {
         }
 
         searchManager.submit(
-            response, // Используем параметр response вместо жестко заданной строки
+            response,
             Geometry.fromBoundingBox(createBoundingBox(Point(54.9885, 73.3242), 1000.0f)),
             searchOptions,
             searchSessionListener,

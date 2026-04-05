@@ -47,7 +47,6 @@ class RecommendationViewRenderer(
         container.addView(root)
     }
 
-    // ---------------- HEADER ----------------
 
     private fun header(state: MainUiState): View {
         return LinearLayout(context).apply {
@@ -68,7 +67,6 @@ class RecommendationViewRenderer(
         }
     }
 
-    // ---------------- CARD ----------------
 
     private fun recommendationCard(rec: Recommendation): View {
         return LinearLayout(context).apply {
@@ -117,7 +115,6 @@ class RecommendationViewRenderer(
         }
     }
 
-    // ---------------- TOGGLE ----------------
 
     private fun toggle(state: MainUiState): View {
         return TextView(context).apply {
@@ -144,7 +141,6 @@ class RecommendationViewRenderer(
         }
     }
 
-    // ---------------- MESSAGE ----------------
 
     private fun message(text: String?): View {
         return TextView(context).apply {
@@ -155,7 +151,6 @@ class RecommendationViewRenderer(
         }
     }
 
-    // ---------------- HELPERS ----------------
 
     private fun roundedBg(color: String, radius: Float): Drawable {
         return GradientDrawable().apply {

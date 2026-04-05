@@ -1,5 +1,6 @@
 package com.example.map.data
 
+import android.util.Log
 import androidx.lifecycle.lifecycleScope
 import com.example.map.MainActivity
 import com.example.map.data.network.NetworkModule.createRecommendationApi
@@ -10,7 +11,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import android.util.Log
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.roundToInt
@@ -20,7 +20,6 @@ import kotlin.math.sqrt
 class FakePlacesDataSource(
     private val context: MainActivity
 ) {
-    // Используем StateFlow для реактивного обновления данных
     private val _places = MutableStateFlow<List<Recommendation>>(emptyList())
     val places: StateFlow<List<Recommendation>> = _places.asStateFlow()
 
@@ -29,13 +28,9 @@ class FakePlacesDataSource(
     private val seedPlaces: List<Recommendation> = buildSeedPlaces()
 
     init {
-        // Загружаем данные при инициализации
         loadPlacesFromDatabase()
     }
 
-    /**
-     * Загружает точки из базы данных через API
-     */
     fun loadPlacesFromDatabase() {
         if (isLoading || loadAttempted) return
 
@@ -66,9 +61,6 @@ class FakePlacesDataSource(
         }
     }
 
-    /**
-     * Получает рекомендации на основе локации и профиля пользователя
-     */
     fun recommend(
         location: SelectedLocation,
         profile: UserProfile,
@@ -77,7 +69,6 @@ class FakePlacesDataSource(
             "Recommendations",
             "Fallback recommend for lat=${location.latitude}, lon=${location.longitude}",
         )
-        // Если данные еще не загружены, пытаемся загрузить синхронно
         if (_places.value.isEmpty() && !loadAttempted) {
             loadPlacesFromDatabase()
         }
@@ -168,7 +159,6 @@ class FakePlacesDataSource(
     }
 
     private fun buildSeedPlaces(): List<Recommendation> {
-        // Офлайн-датасет вокруг Омска (чтобы основной сценарий работал без логина/бэкенда).
         return listOf(
             Recommendation(
                 id = "seed-omsk-1",

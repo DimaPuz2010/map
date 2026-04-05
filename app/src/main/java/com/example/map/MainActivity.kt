@@ -254,12 +254,9 @@ class MainActivity : AppCompatActivity(), InputListener {
 
     private fun startMapKitSafely() {
         if (mapKitStarted) return
-        // Важно: карта и маркеры должны работать даже без гео-пермишенов.
         mapView?.onStart()
         runCatching { MapKitFactory.getInstance().onStart() }
             .onFailure { e ->
-                // На некоторых прошивках/SDK попытка старта может триггерить LocationSubscription.
-                // Не падаем — геолокационные фичи просто не будут доступны.
                 Log.w("MapKit", "MapKit onStart failed (location permission?)", e)
             }
         mapKitStarted = true

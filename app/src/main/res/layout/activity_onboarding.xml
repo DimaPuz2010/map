@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:background="#F5F1E8">
 
-    <!-- Title -->
     <TextView
         android:id="@+id/title"
         android:layout_width="0dp"
@@ -21,7 +20,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:gravity="center"/>
 
-    <!-- Subtitle -->
     <TextView
         android:id="@+id/subtitle"
         android:layout_width="0dp"
@@ -56,7 +54,6 @@
 
     </FrameLayout>
 
-    <!-- Indicator -->
     <LinearLayout
         android:id="@+id/indicator"
         android:layout_width="wrap_content"
@@ -78,7 +75,6 @@
             style="@style/dot"/>
     </LinearLayout>
 
-    <!-- Button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/onbContinue"
         android:layout_width="0dp"

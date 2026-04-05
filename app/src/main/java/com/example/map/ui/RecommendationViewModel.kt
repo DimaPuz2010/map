@@ -1,17 +1,17 @@
 package com.example.map.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.map.data.RecommendationRepository
 import com.example.map.domain.model.SelectedLocation
+import com.example.map.domain.model.UserProfile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import com.example.map.domain.model.UserProfile
-import android.util.Log
 
 class RecommendationViewModel(
     private val repository: RecommendationRepository,
@@ -38,7 +38,6 @@ class RecommendationViewModel(
     fun setProfile(profile: UserProfile) {
         _uiState.update { it.copy(profile = profile) }
 
-        // Если точка уже выбрана, обновим рекомендации с новым профилем.
         val selected = _uiState.value.selectedLocation ?: return
         onLocationSelected(selected)
     }

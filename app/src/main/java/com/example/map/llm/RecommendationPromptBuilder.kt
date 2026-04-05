@@ -11,15 +11,10 @@ object RecommendationPromptBuilder {
         val maxRadiusMeters: Int = 8_000,
     )
 
-    /**
-     * Строит пользовательский промт (то, что попадет в LocalLlamaClient как userText).
-     * Системные ограничения "строго JSON" задаются в DefaultSystemPrompt.
-     */
     fun build(input: Input): String {
         val loc = input.location
         val p = input.profile
 
-        // Важно: просим модель вернуть строго JSON, чтобы парсинг был надежным.
         return """
 Входные данные для генерации туристических точек:
 

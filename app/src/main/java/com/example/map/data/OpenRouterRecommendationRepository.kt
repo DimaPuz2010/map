@@ -2,7 +2,6 @@ package com.example.map.data
 
 import android.util.Log
 import com.example.map.data.network.openrouter.OpenRouterApi
-import retrofit2.HttpException
 import com.example.map.data.network.openrouter.dto.OpenRouterMessage
 import com.example.map.data.network.openrouter.dto.OpenRouterRequest
 import com.example.map.domain.model.Recommendation
@@ -14,6 +13,7 @@ import com.example.map.llm.RecommendationPromptBuilder
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import retrofit2.HttpException
 import java.util.Locale
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -93,8 +93,6 @@ class OpenRouterRecommendationRepository(
             Log.i(TAG, "--- RAW RESPONSE finish=$finishReason content=${content.length}chars reasoning=${reasoning.length}chars (${elapsedMs}ms) ---")
             content.chunked(3000).forEachIndexed { i, chunk -> Log.d(TAG, "[content:$i] $chunk") }
 
-            // Reasoning-модели (Nemotron, DeepSeek R1) помещают итоговый JSON в content,
-            // но если content обрезан (finish_reason=length), пробуем найти JSON в reasoning
             val raw = if (extractJsonObject(content) != null) content else reasoning.ifBlank { content }
             val extracted = extractJsonObject(raw)
             if (extracted == null) {
@@ -136,7 +134,6 @@ class OpenRouterRecommendationRepository(
     }
 
     private fun extractJsonObject(text: String): String? {
-        // DeepSeek R1 и другие reasoning-модели оборачивают ответ в <think>...</think>
         val stripped = text.replace(Regex("<think>[\\s\\S]*?</think>", RegexOption.IGNORE_CASE), "").trim()
         val start = stripped.indexOf('{')
         val end = stripped.lastIndexOf('}')
