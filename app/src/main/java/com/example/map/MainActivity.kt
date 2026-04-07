@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.map.data.Data
 import com.example.map.data.FakePlacesDataSource
 import com.example.map.data.OpenRouterRecommendationRepository
 import com.example.map.data.network.NetworkModule
@@ -123,9 +124,10 @@ class MainActivity : AppCompatActivity(), InputListener {
         enableEdgeToEdge()
 
         val isMapKitConfigured = MAPKIT_API_KEY.isNotBlank()
-        if (isMapKitConfigured) {
+        if (isMapKitConfigured && !Data.isMapKitConfigured) {
             MapKitFactory.setApiKey(MAPKIT_API_KEY)
             MapKitFactory.initialize(this)
+            Data.isMapKitConfigured = true
         }
 
         setContentView(R.layout.activity_main)
@@ -182,6 +184,7 @@ class MainActivity : AppCompatActivity(), InputListener {
             }
         }
     }
+
     fun setSearchResult(r :List<SearchPoint>){
         resultSerch = r
     }

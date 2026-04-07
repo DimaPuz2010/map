@@ -15,10 +15,9 @@ object Data {
         }
 
     var userId: String = ""
-
-
     val categories = listOf(
         "Музеи", "Парки", "Кафе", "Рестораны",
         "Видовые точки", "Шоппинг", "Развлечения"
     )
+    var isMapKitConfigured = false
 }

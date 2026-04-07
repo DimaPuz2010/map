@@ -40,6 +40,10 @@ class ProfileActivity : AppCompatActivity() {
 
         preference = getPreferences(MODE_PRIVATE)
         if (preference.getString("user_auth", null) != null && preference.getString("user_id", null) != null) {
+            loadBtn.isActivated = false
+            createTx.isActivated = false
+            statusTv.text = "Попытка входа в аккаунт, ожидайте"
+
             lifecycleScope.launch {
                 runCatching {
                     Log.d("prof", preference.getString("user_auth", null).toString())
@@ -56,8 +60,10 @@ class ProfileActivity : AppCompatActivity() {
                     setResultOk(profile)
                 }.onFailure { e ->
                     statusTv.text = "Ошибка: ${e.message}"
-                    Log.d("Net",e.message.toString())
+                    Log.d("AuthNet",e.message.toString())
                     Toast.makeText(this@ProfileActivity, e.message ?: "Auth failed", Toast.LENGTH_LONG).show()
+                    loadBtn.isActivated = true
+                    createTx.isActivated = true
                 }
             }
 

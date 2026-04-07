@@ -1,11 +1,13 @@
 package com.example.map
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
 import com.google.android.material.button.MaterialButton
 
 class Onboarding : AppCompatActivity() {
@@ -14,7 +16,7 @@ class Onboarding : AppCompatActivity() {
     private lateinit var button: MaterialButton
     private lateinit var icon: ImageView
     private lateinit var dots: List<View>
-
+    private lateinit var preference: SharedPreferences
     private var step = 0
 
     private val pages = listOf(
@@ -26,6 +28,14 @@ class Onboarding : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_onboarding)
+
+        preference = getPreferences(MODE_PRIVATE)
+        val isNew = preference.getBoolean("isUserNew", true)
+        if (!isNew){
+            val intent = Intent(this, ProfileActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
 
         title = findViewById(R.id.title)
         subtitle = findViewById(R.id.subtitle)
@@ -65,6 +75,9 @@ class Onboarding : AppCompatActivity() {
     }
 
     private fun openProfile() {
+        preference.edit(){
+            putBoolean("isUserNew", false)
+        }
         startActivity(Intent(this, ProfileActivity::class.java))
         finish()
     }
