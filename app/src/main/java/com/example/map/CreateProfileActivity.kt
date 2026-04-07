@@ -120,7 +120,6 @@ class CreateProfileActivity : AppCompatActivity() {
         val api = NetworkModule.createRecommendationApi()
             ?: error("Network API is not configured (RECOMMENDATION_BASE_URL missing).")
 
-        // Кнопка сохранения
         btnSave.setOnClickListener {
 
             if (validateForm()) {
