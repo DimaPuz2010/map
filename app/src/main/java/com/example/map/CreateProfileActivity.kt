@@ -171,9 +171,9 @@ class CreateProfileActivity : AppCompatActivity() {
                         setResultOk(profile)
                         btnSave.isActivated = true
                     }.onFailure { e ->
-                        statusTv.text = "Ошибка: ${e.message}"
+                        statusTv.text = "Ошибка"
                         Log.d("Net",e.message.toString())
-                        Toast.makeText(this@CreateProfileActivity, e.message ?: "Auth failed", Toast.LENGTH_LONG).show()
+                        //Toast.makeText(this@CreateProfileActivity, e.message ?: "Auth failed", Toast.LENGTH_LONG).show()
                         btnSave.isActivated = true
                     }
                 }

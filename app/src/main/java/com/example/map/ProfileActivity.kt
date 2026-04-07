@@ -59,9 +59,9 @@ class ProfileActivity : AppCompatActivity() {
                     Data.userAuth = "${preference.getString("user_auth", null).toString()}"
                     setResultOk(profile)
                 }.onFailure { e ->
-                    statusTv.text = "Ошибка: ${e.message}"
+                    statusTv.text = "Ошибка"
                     Log.d("AuthNet",e.message.toString())
-                    Toast.makeText(this@ProfileActivity, e.message ?: "Auth failed", Toast.LENGTH_LONG).show()
+                    //Toast.makeText(this@ProfileActivity, e.message ?: "Auth failed", Toast.LENGTH_LONG).show()
                     loadBtn.isActivated = true
                     createTx.isActivated = true
                 }
@@ -107,9 +107,9 @@ class ProfileActivity : AppCompatActivity() {
                         }
                         setResultOk(profile)
                     }.onFailure { e ->
-                        statusTv.text = "Ошибка: ${e.message}"
+                        statusTv.text = "Ошибка"
                         Log.d("Net",e.message.toString())
-                        Toast.makeText(this@ProfileActivity, e.message ?: "Auth failed", Toast.LENGTH_LONG).show()
+                        //Toast.makeText(this@ProfileActivity, e.message ?: "Auth failed", Toast.LENGTH_LONG).show()
                     }
                 }
             }
