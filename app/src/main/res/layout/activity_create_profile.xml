@@ -92,23 +92,15 @@
                 android:hint="@string/travel_style"
                 android:inputType="textMultiLine" />
         </com.google.android.material.textfield.TextInputLayout>
-<!--        -->
-<!--        <TextView-->
-<!--            android:id="@+id/profileStatusTv"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginTop="0dp"-->
-<!--            android:textAppearance="?attr/textAppearanceBodyMedium"-->
-<!--            android:textColor="?attr/colorOnSurface"-->
-<!--            tools:text="Статус: ожидание"/>-->
+
         <TextView
-            android:id="@+id/c"
-            android:layout_width="match_parent"
+            android:id="@+id/profileStatusTv"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Статус: ожидание"
-            android:textSize="12sp"
+            android:layout_marginTop="0dp"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
             android:textColor="?attr/colorOnSurface"
-            />
+            tools:text="Статус: ожидание"/>
 
         <LinearLayout
             android:layout_width="match_parent"

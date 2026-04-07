@@ -106,7 +106,7 @@ class CreateProfileActivity : AppCompatActivity() {
         etTravelStyle = findViewById(R.id.etTravelStyle)
         btnCancel = findViewById(R.id.btnCancel)
         btnSave = findViewById(R.id.btnSave)
-        statusTv = findViewById(R.id.createStatusTv)
+        statusTv = findViewById(R.id.profileStatusTv)
     }
 
     private fun setupListeners() {
