@@ -95,7 +95,7 @@ class FakePlacesDataSource(
                     reason = buildReason(place.category, profile, preferred, disliked, distance),
                 )
             }
-            .filter { it.distanceMeters <= 8_000 }
+            .filter { it.distanceMeters <= 4_000 }
             .sortedByDescending { score(it, preferred, disliked, history) }
             .take(5)
             .also { Log.i("Recommendations", "Fallback result size=${it.size}") }

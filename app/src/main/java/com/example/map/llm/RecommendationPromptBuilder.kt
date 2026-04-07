@@ -8,7 +8,7 @@ object RecommendationPromptBuilder {
         val location: SelectedLocation,
         val profile: UserProfile,
         val maxPlaces: Int = 5,
-        val maxRadiusMeters: Int = 8_000,
+        val maxRadiusMeters: Int = 4_000,
     )
 
     fun build(input: Input): String {
@@ -37,7 +37,7 @@ object RecommendationPromptBuilder {
 2) Предложи до ${input.maxPlaces} туристических мест рядом с точкой.
 3) Используй preferredCategories приоритетно.
 4) Избегай dislikedCategories.
-5) Для каждой точки верни координаты, чтобы их можно было сразу поставить на карту.
+5) Для каждой точки верни их настоящие координаты, чтобы их можно было сразу поставить на карту.
 
 Формат ответа (строго JSON, без markdown и любых пояснений):
 {

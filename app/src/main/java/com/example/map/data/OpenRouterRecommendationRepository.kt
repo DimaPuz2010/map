@@ -53,7 +53,7 @@ class OpenRouterRecommendationRepository(
   ]
 }
 
-Возвращай СТРОГО только те точки котоырые существуют в заданном городе
+Возвращай СТРОГО только те точки котоырые существуют в заданном городе и только их НАСТОЯЩИЕ координаты
 Если подходящих точек найти нельзя, верни:
 { "places": [] }"""
     }
@@ -68,7 +68,7 @@ class OpenRouterRecommendationRepository(
                     location = location,
                     profile = profile,
                     maxPlaces = maxPlaces,
-                    maxRadiusMeters = 8_000,
+                    maxRadiusMeters = 4_000,
                 ),
             )
 
