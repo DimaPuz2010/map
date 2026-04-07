@@ -108,7 +108,7 @@ class ProfileActivity : AppCompatActivity() {
                         setResultOk(profile)
                     }.onFailure { e ->
                         statusTv.text = "Ошибка"
-                        Log.d("Net",e.message.toString())
+                        Log.e("Net",e.message.toString())
                         //Toast.makeText(this@ProfileActivity, e.message ?: "Auth failed", Toast.LENGTH_LONG).show()
                     }
                 }

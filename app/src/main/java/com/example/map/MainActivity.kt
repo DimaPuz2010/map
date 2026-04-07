@@ -1,6 +1,6 @@
 package com.example.map
 
-import RecommendationViewRenderer
+import com.example.map.ui.RecommendationViewRenderer
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -24,7 +24,6 @@ import com.example.map.data.Data
 import com.example.map.data.FakePlacesDataSource
 import com.example.map.data.OpenRouterRecommendationRepository
 import com.example.map.data.network.NetworkModule
-import com.example.map.data.network.SearchingMapPlace
 import com.example.map.domain.model.SearchPoint
 import com.example.map.domain.model.SelectedLocation
 import com.example.map.domain.model.UserProfile
@@ -55,7 +54,6 @@ class MainActivity : AppCompatActivity(), InputListener {
     private var recommendationMarkers: List<PlacemarkMapObject> = emptyList()
     private var lastRecommendationsSignature: String = ""
     private lateinit var profile: UserProfile
-    private var resultSerch: List<SearchPoint> = listOf()
     private var mapKitStarted: Boolean = false
     private lateinit var locationPermissionLauncher: ActivityResultLauncher<Array<String>>
     private var recommendationPinProvider: ImageProvider? = null
@@ -185,9 +183,6 @@ class MainActivity : AppCompatActivity(), InputListener {
         }
     }
 
-    fun setSearchResult(r :List<SearchPoint>){
-        resultSerch = r
-    }
 
     private fun renderRecommendationsOnMap(recommendations: List<com.example.map.domain.model.Recommendation>) {
         val map = mapView?.mapWindow?.map ?: return
@@ -308,10 +303,6 @@ class MainActivity : AppCompatActivity(), InputListener {
                 longitude = point.longitude,
             ),
         )
-        lifecycleScope.launch{
-            val sea = SearchingMapPlace()
-            Log.d("adfsadsads", resultSerch.toString())
-        }
     }
 
     override fun onMapLongTap(map: Map, point: Point) = Unit

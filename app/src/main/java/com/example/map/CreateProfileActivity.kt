@@ -192,7 +192,7 @@ class CreateProfileActivity : AppCompatActivity() {
         }
         Data.userId = "eq."+profile.id
         startActivity(intent)
-        setResult(Activity.RESULT_OK, intent)
+        setResult(RESULT_OK, intent)
         finish()
     }
     private fun validateForm(): Boolean {

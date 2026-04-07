@@ -37,7 +37,6 @@ class SearchingMapPlace {
                     )
                 }
                 continuation.resume(points)
-                cont.setSearchResult(points)
             }
 
             override fun onSearchError(error: com.yandex.runtime.Error) {

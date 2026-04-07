@@ -21,7 +21,6 @@ class FakePlacesDataSource(
     private val context: MainActivity
 ) {
     private val _places = MutableStateFlow<List<Recommendation>>(emptyList())
-    val places: StateFlow<List<Recommendation>> = _places.asStateFlow()
 
     private var isLoading = false
     private var loadAttempted = false

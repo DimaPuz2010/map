@@ -1,3 +1,5 @@
+package com.example.map.ui
+
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
@@ -8,7 +10,6 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.example.map.domain.model.Recommendation
-import com.example.map.ui.MainUiState
 
 class RecommendationViewRenderer(
     private val context: Context,
