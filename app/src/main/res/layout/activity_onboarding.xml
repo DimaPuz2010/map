@@ -79,7 +79,7 @@
         android:id="@+id/onbContinue"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Далее"
+        android:text="@string/next"
         android:layout_margin="16dp"
         app:cornerRadius="16dp"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -11,14 +11,29 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Редактировать профиль"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:textColor="#1C1611"
-            android:layout_marginBottom="20dp"/>
+            android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/voidString"
+                android:src="@drawable/frame_966"
+                android:background="#F5F1E8"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/profile_redact"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="#1C1611"
+                android:layout_marginBottom="20dp"
+                android:paddingStart="8dp"/>
+        </LinearLayout>
+
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
@@ -28,7 +43,7 @@
                 android:id="@+id/etName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Имя"
+                android:hint="@string/name"
                 android:inputType="textPersonName"/>
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -41,14 +56,14 @@
                 android:id="@+id/etTravelStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Стиль путешествий"
+                android:hint="@string/travel_style"
                 android:inputType="textMultiLine"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Выбор категории:"
+            android:text="@string/travel_category"
             android:textSize="16sp"
             android:layout_marginTop="16dp"/>
 
@@ -63,7 +78,7 @@
             android:id="@+id/btnSave"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Сохранить"
+            android:text="@string/save"
             android:layout_marginTop="24dp"
             app:cornerRadius="16dp"/>
 

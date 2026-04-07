@@ -16,7 +16,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Создание профиля"
+            android:text="@string/profile_creating"
             android:textSize="24sp"
             android:textStyle="bold"
             android:gravity="center"
@@ -32,7 +32,7 @@
                 android:id="@+id/etDisplayName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Имя пользователя"
+                android:hint="@string/name"
                 android:inputType="textPersonName" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -46,7 +46,7 @@
                 android:id="@+id/etEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Почта"
+                android:hint="@string/email"
                 android:maxLines="1"
                 android:imeOptions="actionDone" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -60,7 +60,7 @@
                 android:id="@+id/etPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Пароль"
+                android:hint="@string/password"
                 android:inputType="textPassword"
                 android:maxLines="1"
                 android:imeOptions="actionDone" />
@@ -68,7 +68,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Выбор категории:"
+            android:text="@string/select_category"
             android:textSize="16sp"/>
 
         <com.google.android.material.chip.ChipGroup
@@ -89,7 +89,7 @@
                 android:id="@+id/etTravelStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Стиль путешествий"
+                android:hint="@string/travel_style"
                 android:inputType="textMultiLine" />
         </com.google.android.material.textfield.TextInputLayout>
 <!--        -->
@@ -102,7 +102,7 @@
 <!--            android:textColor="?attr/colorOnSurface"-->
 <!--            tools:text="Статус: ожидание"/>-->
         <TextView
-            android:id="@+id/createStatusTv"
+            android:id="@+id/c"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Статус: ожидание"
@@ -122,7 +122,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
-                android:text="Отмена"
+                android:text="@string/cancel"
                 android:backgroundTint="@android:color/darker_gray" />
 
             <Button
@@ -131,7 +131,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:text="Сохранить"
+                android:text="@string/save"
                 android:backgroundTint="@color/design_default_color_primary" />
         </LinearLayout>
 

@@ -11,7 +11,7 @@
         android:id="@+id/emailTil"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Email"
+        android:hint="@string/email"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -30,7 +30,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:hint="Пароль"
+        android:hint="@string/password"
         app:layout_constraintTop_toBottomOf="@id/emailTil"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -50,7 +50,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Загрузить профиль"
+        android:text="@string/profile_load"
         app:layout_constraintTop_toBottomOf="@id/passwordTil"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -76,6 +76,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/profileStatusTv"
         app:layout_constraintTop_toBottomOf="@id/loadProfileBtn"
-        tools:text="Создать аккаунт"
+        tools:text="@string/profile_create"
         android:gravity="end"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -26,6 +27,7 @@ class EditProfileActivity : AppCompatActivity() {
     private lateinit var chipGroup: ChipGroup
     private lateinit var btnSave: MaterialButton
     private lateinit var progress: View
+    private lateinit var btnBack: ImageButton
 
     private lateinit var prefs: SharedPreferences
 
@@ -47,6 +49,11 @@ class EditProfileActivity : AppCompatActivity() {
         initViews()
         loadProfile()
 
+        btnBack.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
         btnSave.setOnClickListener {
             if (validate()) {
                 saveProfile()
@@ -61,6 +68,7 @@ class EditProfileActivity : AppCompatActivity() {
         chipGroup = findViewById(R.id.chipGroup)
         btnSave = findViewById(R.id.btnSave)
         progress = findViewById(R.id.progress)
+        btnBack = findViewById(R.id.btnBack)
     }
 
 
