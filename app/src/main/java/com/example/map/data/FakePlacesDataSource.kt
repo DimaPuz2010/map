@@ -38,13 +38,13 @@ class FakePlacesDataSource(
             try {
                 val api = createRecommendationApi()
                 if (api != null) {
-                    val recommendations = api.getRecommendationsFromDb(Data.userAuth)
-                    _places.value = if (recommendations.isNotEmpty()) recommendations else seedPlaces
+                    //val recommendations = api.getRecommendationsFromDb(Data.userAuth)
+                    _places.value = /*if (recommendations.isNotEmpty()) recommendations else*/ seedPlaces
                     loadAttempted = true
-                    Log.i(
-                        "Recommendations",
-                        "Loaded ${recommendations.size} places from DB, seedUsed=${recommendations.isEmpty()}",
-                    )
+//                    Log.i(
+//                        "Recommendations",
+//                        "Loaded ${recommendations.size} places from DB, seedUsed=${recommendations.isEmpty()}",
+//                    )
                 } else {
                     Log.w("Recommendations", "API is null, using seed places")
                     _places.value = seedPlaces

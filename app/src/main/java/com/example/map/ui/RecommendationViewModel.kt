@@ -85,7 +85,7 @@ class RecommendationViewModel(
     }
 
     class Factory(
-        private val repository: RecommendationRepository,
+        private val repository: RecommendationRepository
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {

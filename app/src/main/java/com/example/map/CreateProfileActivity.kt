@@ -191,6 +191,7 @@ class CreateProfileActivity : AppCompatActivity() {
             putString("user_id", "eq." + profile.id)
         }
         Data.userId = "eq."+profile.id
+        Data.profile = profile
         startActivity(intent)
         setResult(RESULT_OK, intent)
         finish()

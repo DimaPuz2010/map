@@ -133,8 +133,6 @@ class MainActivity : AppCompatActivity(), InputListener {
         divContainer = findViewById(R.id.divContainer)
         loadingBar = findViewById(R.id.loadingBar)
 
-
-
         locationPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { _ ->
                 if (isMapKitConfigured) startMapKitSafely()
@@ -146,6 +144,7 @@ class MainActivity : AppCompatActivity(), InputListener {
             setupMap()
         }
         viewModel.onMapReady(isMapKitConfigured)
+        viewModel.setProfile(Data.profile)
         renderer = RecommendationViewRenderer(
             context = this,
             onMoveToPoint = { lat, lon -> moveToPoint(lat, lon) },
@@ -158,9 +157,8 @@ class MainActivity : AppCompatActivity(), InputListener {
             if (json.isBlank()) return@registerForActivityResult
 
             profile = Gson().fromJson(json, UserProfile::class.java)
-            viewModel.setProfile(profile)
+            viewModel.setProfile(Data.profile)
         }
-
         findViewById<MaterialButton>(R.id.profileBtn).setOnClickListener {
             profileLauncher.launch(Intent(this, EditProfileActivity::class.java))
         }

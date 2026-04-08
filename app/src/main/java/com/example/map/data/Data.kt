@@ -1,5 +1,7 @@
 package com.example.map.data
 
+import com.example.map.domain.model.UserProfile
+
 object Data {
     var userAuth: String = ""
         set(value) {
@@ -20,4 +22,6 @@ object Data {
         "Видовые точки", "Шоппинг", "Развлечения"
     )
     var isMapKitConfigured = false
+
+    lateinit var profile: UserProfile
 }

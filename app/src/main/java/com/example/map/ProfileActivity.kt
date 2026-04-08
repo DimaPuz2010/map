@@ -61,6 +61,7 @@ class ProfileActivity : AppCompatActivity() {
                 }.onFailure { e ->
                     statusTv.text = "Ошибка"
                     Log.d("AuthNet",e.message.toString())
+                    Log.d("AuthNet",preference.getString("user_auth", null).toString())
                     //Toast.makeText(this@ProfileActivity, e.message ?: "Auth failed", Toast.LENGTH_LONG).show()
                     loadBtn.isActivated = true
                     createTx.isActivated = true
@@ -127,6 +128,7 @@ class ProfileActivity : AppCompatActivity() {
             putString("user_id", "eq."+profile.id)
         }
         Data.userId = "eq."+profile.id
+        Data.profile = profile
 
         startActivity(intent)
         setResult(Activity.RESULT_OK, intent)

@@ -16,7 +16,7 @@ data class MainUiState(
 
 val defaultProfile = UserProfile(
     id = "guest-omsk",
-    displayName = "Alexey",
+    displayName = "Guest",
     preferredCategories ="Museum Park Viewpoint",
     dislikedCategories = "Nightlife",
     travelStyle = "Calm city trips",
