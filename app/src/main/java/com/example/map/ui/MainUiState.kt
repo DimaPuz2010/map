@@ -1,11 +1,12 @@
 package com.example.map.ui
 
+import com.example.map.data.Data
 import com.example.map.domain.model.Recommendation
 import com.example.map.domain.model.SelectedLocation
 import com.example.map.domain.model.UserProfile
 
 data class MainUiState(
-    val profile: UserProfile = defaultProfile,
+    val profile: UserProfile = Data.profile,
     val selectedLocation: SelectedLocation? = null,
     val recommendations: List<Recommendation> = emptyList(),
     val isLoading: Boolean = false,

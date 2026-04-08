@@ -168,6 +168,7 @@ class EditProfileActivity : AppCompatActivity() {
                     id = id,
                     userProfile = updated
                 )
+                Data.profile = updated
             }.onSuccess {
                 toast("Сохранено ✅")
                 startActivity(intent)

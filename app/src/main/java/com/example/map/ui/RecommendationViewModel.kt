@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.map.data.Data
 import com.example.map.data.RecommendationRepository
 import com.example.map.domain.model.SelectedLocation
 import com.example.map.domain.model.UserProfile
@@ -17,7 +18,7 @@ class RecommendationViewModel(
     private val repository: RecommendationRepository,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(MainUiState())
+    private val _uiState = MutableStateFlow(MainUiState(profile =  Data.profile))
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
     fun onMapReady(isReady: Boolean) {
