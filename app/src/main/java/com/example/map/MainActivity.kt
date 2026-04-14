@@ -59,7 +59,6 @@ class MainActivity : AppCompatActivity(), InputListener {
     private var recommendationPinProvider: ImageProvider? = null
     private var selectedPinProvider: ImageProvider? = null
     private lateinit var renderer: RecommendationViewRenderer
-    private var isClickAvailable: Boolean = true
     private val recommendationTapListener = object : MapObjectTapListener {
         override fun onMapObjectTap(mapObject: MapObject, point: Point): Boolean {
             val recommendation = mapObject.userData as? com.example.map.domain.model.Recommendation
@@ -210,7 +209,6 @@ class MainActivity : AppCompatActivity(), InputListener {
             placemark.addTapListener(recommendationTapListener)
             placemark
         }
-        isClickAvailable = true
     }
 
     private fun setupMap() {
@@ -274,7 +272,6 @@ class MainActivity : AppCompatActivity(), InputListener {
     }
 
     override fun onMapTap(map: Map, point: Point) {
-        if (!isClickAvailable) return
         Log.i("LocationFlow", "Map tap at lat=${point.latitude}, lon=${point.longitude}")
         selectedPlacemark?.let { map.mapObjects.remove(it) }
         val selectedPin = selectedPinProvider ?: run {
@@ -303,7 +300,6 @@ class MainActivity : AppCompatActivity(), InputListener {
                 longitude = point.longitude,
             ),
         )
-        isClickAvailable = false
     }
 
     override fun onMapLongTap(map: Map, point: Point) = Unit
