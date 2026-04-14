@@ -127,10 +127,10 @@ class CreateProfileActivity : AppCompatActivity() {
                     runCatching {
                         btnSave.isActivated = false
 
-                        var loginResp = api.singUp(
+                        val loginResp = api.singUp(
                             auth = Auth(email = email.text.toString(), password = password.text.toString()),
                         )
-                        var authHeader = "Bearer ${loginResp.access_token}"
+                        val authHeader = "Bearer ${loginResp.access_token}"
 
 
                         Data.userAuth = authHeader
@@ -147,7 +147,7 @@ class CreateProfileActivity : AppCompatActivity() {
 
                         val likedStr = liked.joinToString(",")
                         val dislikedStr = disliked.joinToString(",")
-                        val changedProfile = api.changeProfile(
+                        api.changeProfile(
                             auth = authHeader,
                             id = ("eq."+loginResp.user?.id.toString()),
                             userProfile = UserProfile(

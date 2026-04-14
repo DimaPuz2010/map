@@ -42,6 +42,7 @@ import com.yandex.mapkit.mapview.MapView
 import com.yandex.runtime.image.ImageProvider
 import kotlinx.coroutines.launch
 import java.util.Locale
+import androidx.core.graphics.createBitmap
 
 class MainActivity : AppCompatActivity(), InputListener {
     private val MAPKIT_API_KEY = "a6f0b6af-0e69-4781-8782-5fa1061829f7"
@@ -309,11 +310,7 @@ class MainActivity : AppCompatActivity(), InputListener {
 
     private fun createBitmapFromVector(art: Int): Bitmap? {
         val drawable = ContextCompat.getDrawable(this, art) ?: return null
-        val bitmap = Bitmap.createBitmap(
-            drawable.intrinsicWidth,
-            drawable.intrinsicHeight,
-            Bitmap.Config.ARGB_8888,
-        )
+        val bitmap = createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight)
         val canvas = Canvas(bitmap)
         drawable.setBounds(0, 0, canvas.width, canvas.height)
         drawable.draw(canvas)

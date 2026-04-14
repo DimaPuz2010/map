@@ -11,6 +11,7 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.example.map.domain.model.Recommendation
+import androidx.core.graphics.toColorInt
 
 class RecommendationViewRenderer(
     private val context: Context,
@@ -55,13 +56,13 @@ class RecommendationViewRenderer(
                 text = state.profile.displayName ?: "Guest"
                 textSize = 18f
                 setTypeface(null, Typeface.BOLD)
-                setTextColor(Color.parseColor("#1C1611"))
+                setTextColor("#1C1611".toColorInt())
             })
 
             addView(TextView(context).apply {
                 text = state.profile.travelStyle ?: ""
                 textSize = 13f
-                setTextColor(Color.parseColor("#6A5E52"))
+                setTextColor("#6A5E52".toColorInt())
             })
         }
     }
@@ -85,25 +86,25 @@ class RecommendationViewRenderer(
                 text = rec.name
                 textSize = 16f
                 setTypeface(null, Typeface.BOLD)
-                setTextColor(Color.parseColor("#1C1611"))
+                setTextColor("#1C1611".toColorInt())
             })
 
             addView(TextView(context).apply {
                 text = rec.category
                 textSize = 13f
-                setTextColor(Color.parseColor("#6A5E52"))
+                setTextColor("#6A5E52".toColorInt())
             })
 
             addView(TextView(context).apply {
                 text = "⭐ %.1f  •  ${rec.distanceMeters} м".format(rec.rating)
                 textSize = 12f
-                setTextColor(Color.parseColor("#3C332C"))
+                setTextColor("#3C332C".toColorInt())
             })
 
             addView(TextView(context).apply {
                 text = rec.reason
                 textSize = 12f
-                setTextColor(Color.parseColor("#4A4038"))
+                setTextColor("#4A4038".toColorInt())
                 setPadding(0, dp(6), 0, 0)
             })
 
@@ -122,7 +123,7 @@ class RecommendationViewRenderer(
 
             textSize = 13f
             setTypeface(null, Typeface.BOLD)
-            setTextColor(Color.parseColor("#3C332C"))
+            setTextColor("#3C332C".toColorInt())
 
             setPadding(dp(14), dp(8), dp(14), dp(8))
             background = roundedBg("#E8E0D6", 50f)
@@ -142,14 +143,14 @@ class RecommendationViewRenderer(
         return TextView(context).apply {
             this.text = text
             textSize = 14f
-            setTextColor(Color.parseColor("#4A4038"))
+            setTextColor("#4A4038".toColorInt())
             setPadding(0, dp(12), 0, 0)
         }
     }
 
     private fun roundedBg(color: String, radius: Float): Drawable {
         return GradientDrawable().apply {
-            setColor(Color.parseColor(color))
+            setColor(color.toColorInt())
             cornerRadius = dp(radius.toInt()).toFloat()
         }
 

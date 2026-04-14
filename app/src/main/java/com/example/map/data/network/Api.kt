@@ -40,7 +40,7 @@ interface Api {
         @Body userProfile: UserProfile
     )
 
-    @POST("rest/v1/recomindation")
+    /*@POST("rest/v1/recomindation")
     suspend fun createRecommendation(
         @Header("apikey") apiKey: String = "sb_publishable_8F_XgYfzMI0Saj6xY7kcAQ_dK4P3vuz",
         @Header("Authorization") auth: String = "",
@@ -58,5 +58,5 @@ interface Api {
     suspend fun getRecommendationsFromDb(
         @Header("apikey") apiKey: String = "sb_publishable_8F_XgYfzMI0Saj6xY7kcAQ_dK4P3vuz",
         @Header("Authorization") auth: String = "",
-    ): List<Recommendation>
+    ): List<Recommendation>*/
 }
