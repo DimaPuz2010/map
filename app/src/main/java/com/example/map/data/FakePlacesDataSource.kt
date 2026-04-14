@@ -21,7 +21,6 @@ class FakePlacesDataSource(
     private val context: MainActivity
 ) {
     private val _places = MutableStateFlow<List<Recommendation>>(emptyList())
-
     private var isLoading = false
     private var loadAttempted = false
     private val seedPlaces: List<Recommendation> = buildSeedPlaces()
@@ -99,7 +98,6 @@ class FakePlacesDataSource(
             .take(5)
             .also { Log.i("Recommendations", "Fallback result size=${it.size}") }
     }
-
 
     private fun score(
         recommendation: Recommendation,

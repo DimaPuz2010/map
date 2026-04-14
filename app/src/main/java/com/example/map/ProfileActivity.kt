@@ -1,6 +1,5 @@
 package com.example.map
 
-import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -38,7 +37,7 @@ class ProfileActivity : AppCompatActivity() {
         val statusTv = findViewById<TextView>(R.id.profileStatusTv)
         val createTx = findViewById<TextView>(R.id.txCreateProfile)
 
-        preference = getPreferences(MODE_PRIVATE)
+        preference = getSharedPreferences("Auth", MODE_PRIVATE)
         if (preference.getString("user_auth", null) != null && preference.getString("user_id", null) != null) {
             loadBtn.isActivated = false
             createTx.isActivated = false
@@ -131,7 +130,7 @@ class ProfileActivity : AppCompatActivity() {
         Data.profile = profile
 
         startActivity(intent)
-        setResult(Activity.RESULT_OK, intent)
+        setResult(RESULT_OK, intent)
         finish()
     }
 }

@@ -95,6 +95,7 @@ class MainActivity : AppCompatActivity(), InputListener {
             return true
         }
     }
+
     private val selectedLocationTapListener = object : MapObjectTapListener {
         override fun onMapObjectTap(mapObject: MapObject, point: Point): Boolean {
             val location = mapObject.userData as? SelectedLocation
@@ -139,7 +140,6 @@ class MainActivity : AppCompatActivity(), InputListener {
             }
         requestLocationPermissionIfNeeded()
 
-
         if (isMapKitConfigured) {
             setupMap()
         }
@@ -163,7 +163,6 @@ class MainActivity : AppCompatActivity(), InputListener {
             profileLauncher.launch(Intent(this, EditProfileActivity::class.java))
         }
 
-
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { uiState ->
@@ -180,7 +179,6 @@ class MainActivity : AppCompatActivity(), InputListener {
             }
         }
     }
-
 
     private fun renderRecommendationsOnMap(recommendations: List<com.example.map.domain.model.Recommendation>) {
         val map = mapView?.mapWindow?.map ?: return

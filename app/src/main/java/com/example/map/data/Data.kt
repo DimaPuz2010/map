@@ -22,6 +22,5 @@ object Data {
         "Видовые точки", "Шоппинг", "Развлечения"
     )
     var isMapKitConfigured = false
-
     lateinit var profile: UserProfile
 }

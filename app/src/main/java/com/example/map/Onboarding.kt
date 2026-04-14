@@ -29,7 +29,7 @@ class Onboarding : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_onboarding)
 
-        preference = getPreferences(MODE_PRIVATE)
+        preference = getSharedPreferences("OnBoard", MODE_PRIVATE)
         val isNew = preference.getBoolean("isUserNew", true)
         if (!isNew){
             val intent = Intent(this, ProfileActivity::class.java)
@@ -81,6 +81,7 @@ class Onboarding : AppCompatActivity() {
         startActivity(Intent(this, ProfileActivity::class.java))
         finish()
     }
+
     private fun updateDots() {
         dots.forEachIndexed { index, view ->
             val isActive = index == step

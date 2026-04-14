@@ -17,7 +17,6 @@ import kotlinx.coroutines.launch
 class RecommendationViewModel(
     private val repository: RecommendationRepository,
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(MainUiState(profile =  Data.profile))
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 

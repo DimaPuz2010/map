@@ -14,6 +14,7 @@ data class MainUiState(
     val isMapReady: Boolean = false,
     val isRecommendationsCollapsed: Boolean = false,
 )
+/*
 
 val defaultProfile = UserProfile(
     id = "guest-omsk",
@@ -26,3 +27,4 @@ val defaultProfile = UserProfile(
     language = "ru",
     history = "Museum",
 )
+*/

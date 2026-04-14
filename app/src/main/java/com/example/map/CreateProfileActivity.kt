@@ -40,7 +40,7 @@ class CreateProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_profile)
 
-        preference = getPreferences(MODE_PRIVATE)
+        preference = getSharedPreferences("Auth", MODE_PRIVATE)
 
         initViews()
         setupListeners()

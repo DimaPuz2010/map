@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.LinearLayout
@@ -16,10 +17,8 @@ class RecommendationViewRenderer(
     private val onMoveToPoint: (Double, Double) -> Unit,
     private val onToggle: () -> Unit,
 ) {
-
     fun render(container: FrameLayout, state: MainUiState) {
         container.removeAllViews()
-
         val root = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(16), dp(16), dp(16), dp(16))
@@ -48,7 +47,6 @@ class RecommendationViewRenderer(
         container.addView(root)
     }
 
-
     private fun header(state: MainUiState): View {
         return LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
@@ -67,7 +65,6 @@ class RecommendationViewRenderer(
             })
         }
     }
-
 
     private fun recommendationCard(rec: Recommendation): View {
         return LinearLayout(context).apply {
@@ -116,7 +113,6 @@ class RecommendationViewRenderer(
         }
     }
 
-
     private fun toggle(state: MainUiState): View {
         return TextView(context).apply {
             text = if (state.isRecommendationsCollapsed)
@@ -142,7 +138,6 @@ class RecommendationViewRenderer(
         }
     }
 
-
     private fun message(text: String?): View {
         return TextView(context).apply {
             this.text = text
@@ -152,12 +147,12 @@ class RecommendationViewRenderer(
         }
     }
 
-
     private fun roundedBg(color: String, radius: Float): Drawable {
         return GradientDrawable().apply {
             setColor(Color.parseColor(color))
             cornerRadius = dp(radius.toInt()).toFloat()
         }
+
     }
 
     private fun dp(value: Int): Int {

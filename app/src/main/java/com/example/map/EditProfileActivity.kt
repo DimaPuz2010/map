@@ -28,23 +28,14 @@ class EditProfileActivity : AppCompatActivity() {
     private lateinit var btnSave: MaterialButton
     private lateinit var progress: View
     private lateinit var btnBack: ImageButton
-
-    private lateinit var prefs: SharedPreferences
-
     private val api = NetworkModule.createRecommendationApi()
         ?: error("API not configured")
-
     private var currentProfile: UserProfile? = null
-
-
     private val categoryStates = mutableMapOf<String, State>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_profile)
-
-        prefs = getPreferences(MODE_PRIVATE)
-
 
         initViews()
         loadProfile()
@@ -61,7 +52,6 @@ class EditProfileActivity : AppCompatActivity() {
         }
     }
 
-
     private fun initViews() {
         etName = findViewById(R.id.etName)
         etTravelStyle = findViewById(R.id.etTravelStyle)
@@ -70,7 +60,6 @@ class EditProfileActivity : AppCompatActivity() {
         progress = findViewById(R.id.progress)
         btnBack = findViewById(R.id.btnBack)
     }
-
 
     private fun loadProfile() {
         val id = Data.userId
@@ -96,7 +85,6 @@ class EditProfileActivity : AppCompatActivity() {
             showLoading(false)
         }
     }
-
 
     private fun setupChips(profile: UserProfile) {
         chipGroup.removeAllViews()
@@ -143,7 +131,6 @@ class EditProfileActivity : AppCompatActivity() {
             ?: emptySet()
     }
 
-
     private fun saveProfile() {
         val auth = Data.userAuth
         val id = Data.userId
@@ -181,7 +168,6 @@ class EditProfileActivity : AppCompatActivity() {
         }
     }
 
-
     private fun showLoading(show: Boolean) {
         progress.visibility = if (show) View.VISIBLE else View.GONE
         btnSave.isEnabled = !show
@@ -198,7 +184,6 @@ class EditProfileActivity : AppCompatActivity() {
     private fun toast(msg: String) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }
-
 
     private fun createChip(context: Context, text: String): Chip {
         return Chip(context).apply {
