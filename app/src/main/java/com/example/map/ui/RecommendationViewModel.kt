@@ -64,7 +64,7 @@ class RecommendationViewModel(
                             recommendations = recommendations,
                             isLoading = false,
                             errorMessage = if (recommendations.isEmpty()) {
-                                "No suitable places were found nearby. Pick another point on the map."
+                                "Не найдены подходящие места. Попробуйте заново или выберите другое место."
                             } else {
                                 null
                             },

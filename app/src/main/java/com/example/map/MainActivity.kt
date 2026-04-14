@@ -24,7 +24,6 @@ import com.example.map.data.Data
 import com.example.map.data.FakePlacesDataSource
 import com.example.map.data.OpenRouterRecommendationRepository
 import com.example.map.data.network.NetworkModule
-import com.example.map.domain.model.SearchPoint
 import com.example.map.domain.model.SelectedLocation
 import com.example.map.domain.model.UserProfile
 import com.example.map.ui.RecommendationViewModel
@@ -99,12 +98,12 @@ class MainActivity : AppCompatActivity(), InputListener {
     private val selectedLocationTapListener = object : MapObjectTapListener {
         override fun onMapObjectTap(mapObject: MapObject, point: Point): Boolean {
             val location = mapObject.userData as? SelectedLocation
-            val coords = if (location != null) {
+            val cords = if (location != null) {
                 formatCoords(location.latitude, location.longitude)
             } else {
                 formatCoords(point.latitude, point.longitude)
             }
-            Toast.makeText(applicationContext, "Выбранная точка: $coords", Toast.LENGTH_SHORT).show()
+            Toast.makeText(applicationContext, "Выбранная точка: $cords", Toast.LENGTH_SHORT).show()
             return true
         }
     }
