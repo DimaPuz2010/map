@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity(), InputListener {
                 }
             }
         } else {
-            "Метка: ${formatCoords(point.latitude, point.longitude)}"
+            "Метка: ${formatCords(point.latitude, point.longitude)}"
         }
         Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
         true
@@ -98,9 +98,9 @@ class MainActivity : AppCompatActivity(), InputListener {
         override fun onMapObjectTap(mapObject: MapObject, point: Point): Boolean {
             val location = mapObject.userData as? SelectedLocation
             val cords = if (location != null) {
-                formatCoords(location.latitude, location.longitude)
+                formatCords(location.latitude, location.longitude)
             } else {
-                formatCoords(point.latitude, point.longitude)
+                formatCords(point.latitude, point.longitude)
             }
             Toast.makeText(applicationContext, "Выбранная точка: $cords", Toast.LENGTH_SHORT).show()
 
@@ -311,7 +311,7 @@ class MainActivity : AppCompatActivity(), InputListener {
         return bitmap
     }
 
-    private fun formatCoords(latitude: Double, longitude: Double): String {
+    private fun formatCords(latitude: Double, longitude: Double): String {
         return String.format(Locale.getDefault(), "%.5f, %.5f", latitude, longitude)
     }
 
