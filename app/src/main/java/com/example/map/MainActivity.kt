@@ -59,41 +59,39 @@ class MainActivity : AppCompatActivity(), InputListener {
     private var recommendationPinProvider: ImageProvider? = null
     private var selectedPinProvider: ImageProvider? = null
     private lateinit var renderer: RecommendationViewRenderer
-    private val recommendationTapListener = object : MapObjectTapListener {
-        override fun onMapObjectTap(mapObject: MapObject, point: Point): Boolean {
-            val recommendation = mapObject.userData as? com.example.map.domain.model.Recommendation
-            val message = if (recommendation != null) {
-                buildString {
-                    append(recommendation.name)
-                    if (recommendation.category.isNotBlank()) {
-                        append(" • ")
-                        append(recommendation.category)
-                    }
-                    if (recommendation.rating > 0.0) {
-                        append(" • ")
-                        append(String.format(Locale.getDefault(), "%.1f", recommendation.rating))
-                    }
-                    if (recommendation.address.isNotBlank()) {
-                        appendLine()
-                        append(recommendation.address)
-                    }
-                    if (recommendation.distanceMeters > 0) {
-                        appendLine()
-                        append("≈ ")
-                        append(recommendation.distanceMeters)
-                        append(" м")
-                    }
-                    if (recommendation.reason.isNotBlank()) {
-                        appendLine()
-                        append(recommendation.reason)
-                    }
+    private val recommendationTapListener = MapObjectTapListener { mapObject, point ->
+        val recommendation = mapObject.userData as? com.example.map.domain.model.Recommendation
+        val message = if (recommendation != null) {
+            buildString {
+                append(recommendation.name)
+                if (recommendation.category.isNotBlank()) {
+                    append(" • ")
+                    append(recommendation.category)
                 }
-            } else {
-                "Метка: ${formatCoords(point.latitude, point.longitude)}"
+                if (recommendation.rating > 0.0) {
+                    append(" • ")
+                    append(String.format(Locale.getDefault(), "%.1f", recommendation.rating))
+                }
+                if (recommendation.address.isNotBlank()) {
+                    appendLine()
+                    append(recommendation.address)
+                }
+                if (recommendation.distanceMeters > 0) {
+                    appendLine()
+                    append("≈ ")
+                    append(recommendation.distanceMeters)
+                    append(" м")
+                }
+                if (recommendation.reason.isNotBlank()) {
+                    appendLine()
+                    append(recommendation.reason)
+                }
             }
-            Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
-            return true
+        } else {
+            "Метка: ${formatCoords(point.latitude, point.longitude)}"
         }
+        Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
+        true
     }
 
     private val selectedLocationTapListener = object : MapObjectTapListener {
